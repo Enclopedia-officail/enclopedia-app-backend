@@ -1,0 +1,13 @@
+---
+env:
+  - DJANGO_VERSION=3.0
+language: python
+python:
+  - "3.7"
+  - "3.8"
+  - "3.9"
+before_script: pip install docker-compose
+script:
+  - 'docker-compose run backend sh -c "python manage.py test && flake8"'
+services:
+  - docker
