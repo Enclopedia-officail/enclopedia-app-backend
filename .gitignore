@@ -127,3 +127,4 @@ dmypy.json
 cython_debug/
 dump.rdb
 info.log
+.travis.yaml
