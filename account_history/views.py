@@ -9,9 +9,12 @@ from .serializers import FavoriteSerialzier, FavoriteListSerializer
 from product.models import Product
 from product.serailizers import ProductSerializer
 from rest_framework import status
+import environ
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
+
+env = environ.Env()
 
 # Create your views here.
 
@@ -89,7 +92,7 @@ def byte_to_str(byte_list: list) -> list:
     return [i.decode('utf8') for i in byte_list]
 
 class BrowsingHistoryView(APIView):
-    redisClient = redis.StrictRedis(host="localhost", port=6379, db=0)
+    redisClient = redis.StrictRedis(host=env("REDIS_LOCATION"), port=6379, db=0)
     def get(self, request):
         try:
             user = request.user
@@ -100,7 +103,8 @@ class BrowsingHistoryView(APIView):
             if products.count() < 30:
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.data[29], status=status.HTTP_200_OK)
+                return Response(serializer.data[0:29], status=status.HTTP_200_OK)
+                
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
     def post(self, request):
@@ -115,16 +119,16 @@ class BrowsingHistoryView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 class SearchHistoryView(APIView):
-    redisClient = redis.StrictRedis(host="localhost", port=6379, db=0)
+    redisClient = redis.StrictRedis(host=env('REDIS_LOCATION'), port=6379, db=0)
     def get(self, request):
 
             user = request.user
             data = byte_to_str(list(self.redisClient.smembers(str(user.id) + 'search')))
-            if len(data) < 10:
+            if len(data) < 15:
                 return Response(data, status=status.HTTP_200_OK)
 
             else:
-                return Response(data[14], status=status.HTTP_200_OK)
+                return Response(data[0:14], status=status.HTTP_200_OK)
 
 
     def post(self, request):
