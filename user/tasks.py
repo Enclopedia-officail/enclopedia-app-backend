@@ -2,6 +2,7 @@ from django.conf import settings
 from celery import shared_task
 from django.core.mail import EmailMessage
 from notification.models import Notification
+from .models import EmailSubscribe
 import environ
 import json
 import requests
@@ -10,6 +11,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 env = environ.Env()
+
+@shared_task
+def create_sendgrid_contact(instance):
+    try:
+        secret = settings.SENDING_API_KEY
+        header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+        url = "https://api.sendgrid.com/v3/contactdb/recipients"
+        data = [
+                    {
+                        "email": instance.email,
+                    }
+                ]
+        response = requests.post(url, headers=header, data=json.dumps(data))
+        email_subscribe = EmailSubscribe.objects.get(user=instance)
+        email_subscribe.recipient_id = response["persisted_recipients"][0]
+        email_subscribe.save()
+    except:
+        logger.error('sendgrid email送信リスト登録 user:{} 登録失敗'.format(instance.id))
 
 @shared_task
 def create_sendgrid_suppressions(instance):

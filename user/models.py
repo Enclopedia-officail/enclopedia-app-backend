@@ -142,6 +142,7 @@ class Profile(models.Model):
 class EmailSubscribe(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+    recipient_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         if self.is_active:

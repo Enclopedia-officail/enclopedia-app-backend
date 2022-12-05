@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from user.models import Account, Adress, Profile, EmailSubscribe, AuthPhoneNumber
 from subscription.models import StripeAccount
 from django_rest_passwordreset.signals import reset_password_token_created
-from .tasks import create_sendgrid_suppressions, send_register_confirmation_email, send_confirmation_email, password_reset
+from .tasks import create_sendgrid_contact, send_register_confirmation_email, send_confirmation_email, password_reset
 from .tasks import send_social_login_register_email, authentication_phone_number
 
 #from axes.signals import user_locked_out
@@ -17,16 +17,7 @@ logger = logging.getLogger(__name__)
 def create_account_profile(sender, instance, created, **kwargs):
     if created and instance.id:
         Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=Account)
-def create_account_adress(sender, instance, created, **kwargs):
-    if created and instance.id:
         Adress.objects.create(user=instance)
-
-@receiver(post_save, sender=Account)
-def create_subscription(sender, instance, created, **kwargs):
-    if created and instance.id:
         StripeAccount.objects.create(user_id=instance)
 
 #accout作成時にsendgrid mailingリストにメールを登録し、EmailSubscribetableを作成する
@@ -35,7 +26,7 @@ def add_sendgrid_maling_list(sender, instance, created, **kwargs):
     try:
         if created and instance.id:
             EmailSubscribe.objects.create(user=instance)
-            create_sendgrid_suppressions(instance)
+            create_sendgrid_contact(instance)
     except:
         logger.error('sendgridユーザ登録 user:{} sendgridユーザ登録に失敗しました。')
 

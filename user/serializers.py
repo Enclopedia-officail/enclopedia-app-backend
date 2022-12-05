@@ -152,7 +152,7 @@ class EmailSubscribeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmailSubscribe
-        fields = ['is_active']
+        fields = ['is_active', 'recipient_id']
 
 from .models import RandomNumber, AuthPhoneNumber
 class RandomNumberSerializer(serializers.ModelSerializer):

@@ -208,10 +208,11 @@ class EmailUpdateView(generics.UpdateAPIView):
             message = {'message': '入力したEメールあるいはパスワードが正しくありません'}
             return Response(message, status=status.HTTP_401_UNAUTHORIZED)
 #suppressionsを利用しemailを特定の購読グループに追加する
-class SendgridRecipientView(APIView):
+class SendgridContactView(APIView):
     def post(self, request):
         data = request.data
         try:
+            #recipient idを保存する必要がある
             secret = settings.SENDGRID_API_KEY
             #header情報を富要する
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
@@ -219,8 +220,6 @@ class SendgridRecipientView(APIView):
             url = 'https://api.sendgrid.com/v3/contactdb/recipients'
             data = [{
                 'email': data['email'],
-                'first_name': data['first_name'],
-                'last_name': data['last_name'],
             }]
             response = requests.post(url, data=json.dumps(data), headers=header,)
             return Response(response, status=status.HTTP_200_OK)
