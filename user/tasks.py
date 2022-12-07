@@ -132,10 +132,8 @@ def authentication_phone_number(instance):
         from_email="operation@enclopediai-info.com",
         to=[instance.user.email]
     )
-    print('send')
     msg.template_id = "d-bcb56a6c49414a70b98fc573042dbdef"
     msg.dynamic_template_data = {
         "authentication_number": instance.random_number.number
     }
-    print('finish')
     msg.send(fail_silently=False)

@@ -7,18 +7,6 @@ logger = logging.getLogger(__name__)
 # 予約回数を制限するためのsignal
 #email送信とカラム作成でuserに遅延が起きないようにする必要がある
 @receiver(pre_save, sender=Reservation)
-def notification_create(sender, instance, update_fields, *args, **kwargs):
-    try:
-        if ("status" in list(update_fields)):
-            print('start')
-            create_reservation_notification(instance)
-        else:
-            pass
-    except:
-        logger.error('予約番号[{}]:確認用emailが送信できませんでした'.format(instance.id))
-        pass
-
-@receiver(pre_save, sender=Reservation)
 def shinnping_notification(sender, instance, update_fields, *args, **kwargs):
     try:
         if("shipping_number" in list(update_fields) & instance.status == 3):
@@ -27,4 +15,22 @@ def shinnping_notification(sender, instance, update_fields, *args, **kwargs):
             pass
     except:
         logger.error('予約番号[{}]: 発送通知の送信に失敗しました'.format(instance.id))
-            
+
+import task
+@receiver(pre_save, sender=Reservation)
+def reservation_notification(sender, instance, update_fileds, *args, **kwargs):
+    try:
+        if("status" in list(update_fileds)):
+            if instance.status == 1:
+                task.create_reservation_success_notification(instance)
+            elif instance.status == 2:
+                task.create_reservation_failed_notification(instance)
+            elif instance.status == 3:
+                task.shipping_product_notification(instance)
+            elif instance.status == 4:
+                task.return_product_notification(instance)
+            elif instance.status == 5:
+                task.return_product_success_notification(instance)
+                task.return_favorite_product_notification(instance)
+    except:
+        logger.error('notification通知に失敗しました。')
