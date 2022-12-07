@@ -10,12 +10,12 @@ import requests
 import logging
 logger = logging.getLogger(__name__)
 
-env = environ.Env()
+env = environ.Env() 
 
 @shared_task
 def create_sendgrid_contact(instance):
     try:
-        secret = settings.SENDING_API_KEY
+        secret = settings.SENDGRID_API_KEY
         header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
         url = "https://api.sendgrid.com/v3/contactdb/recipients"
         data = [
@@ -25,11 +25,10 @@ def create_sendgrid_contact(instance):
                 ]
         response = requests.post(url, headers=header, data=json.dumps(data))
         email_subscribe = EmailSubscribe.objects.get(user=instance)
-        email_subscribe.recipient_id = response["persisted_recipients"][0]
+        email_subscribe.recipient_id = response.json()["persisted_recipients"][0]
         email_subscribe.save()
     except:
         logger.error('sendgrid email送信リスト登録 user:{} 登録失敗'.format(instance.id))
-
 @shared_task
 def create_sendgrid_suppressions(instance):
     try:
@@ -44,7 +43,6 @@ def create_sendgrid_suppressions(instance):
         requests.post(url, headers=header, data=json.dumps(data))
     except:
         logger.error('sendgrid email送信リスト登録 user:{} 登録失敗'.format(instance.id))
-        pass
 
 #今回はuserのidをurlに付与してfrontendに渡すがここをtokenに置き換えを行う。
 @shared_task

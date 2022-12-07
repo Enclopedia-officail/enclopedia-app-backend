@@ -209,6 +209,7 @@ class EmailUpdateView(generics.UpdateAPIView):
             return Response(message, status=status.HTTP_401_UNAUTHORIZED)
 #suppressionsを利用しemailを特定の購読グループに追加する
 class SendgridContactView(APIView):
+
     def post(self, request):
         data = request.data
         try:
@@ -217,11 +218,14 @@ class SendgridContactView(APIView):
             #header情報を富要する
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
             #sendgridのメールリストに単一のメールアドレスを追加する
-            url = 'https://api.sendgrid.com/v3/contactdb/recipients'
+            url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=data['recipient_id'])
             data = [{
                 'email': data['email'],
             }]
             response = requests.post(url, data=json.dumps(data), headers=header,)
+            email_subscribe = EmailSubscribe.objects.get(user=request.user)
+            email_subscribe.recipient_id = response["persisted_recipients"][0]
+            email_subscribe.save()
             return Response(response, status=status.HTTP_200_OK)
         except :
             message = {'message':'メール配信リスト登録が失敗しました。'}
@@ -229,13 +233,13 @@ class SendgridContactView(APIView):
     
     
     #group unsubscriptionに登録と削除でmarktingメールを送信するかどうか決定。
-    def delete(self, reqeust):
+    def delete(self, request):
         #sendgrid 配信リストからuerのemailを削除するためのapiを叩く
+        data = request.data
         try:
             secret = settings.SENDGRID_API_KEY
-            recipient_id = ''
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
-            url = 'https://api.sendgrid.com/v3/contactdb/recipients/' + recipient_id
+            url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=data['recipient_id'])
             response = requests.delete(url, headers=header)
             return Response(response, status.HTTP_200_OK)
         except:
@@ -250,7 +254,7 @@ class SendgridSuppressionsView(APIView):
             email = request.data['email']
             secret = settings.SENDGRID_API_KEY
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
-
+            print(header)
             url = 'https://api.sendgrid.com/v3/asm/groups/{}/suppressions'.format('30160')
             data = {
                 "recipient_emails":[
