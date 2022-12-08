@@ -1,7 +1,7 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from .task import create_reservation_notification
 from .models import Reservation
+from . import task
 import logging
 logger = logging.getLogger(__name__)
 # 予約回数を制限するためのsignal
@@ -16,7 +16,7 @@ def shinnping_notification(sender, instance, update_fields, *args, **kwargs):
     except:
         logger.error('予約番号[{}]: 発送通知の送信に失敗しました'.format(instance.id))
 
-import task
+
 @receiver(pre_save, sender=Reservation)
 def reservation_notification(sender, instance, update_fileds, *args, **kwargs):
     try:

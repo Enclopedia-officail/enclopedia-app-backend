@@ -62,6 +62,19 @@ class FavoriteGetView(generics.RetrieveAPIView):
         serializer = self.serializer_class(product)
         return Response(serializer.data)
 
+class FavoriteUpdateView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Favorite.objects.select_related('user', 'product').all()
+    serializer_class = FavoriteSerialzier
+
+    def update(self, request, *args, **kwargs):
+        data = request.data['favorite']
+        favorite = get_object_or_404(Favorite, id=data['favorite_id'])
+        favorite.is_notification = data['is_notification']
+        favorite.save()
+        serializer = self.serializer_class(favorite)
+        return Response(serializer, status=status.HTTP_200_OK)
+
 
 class FavoriteListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
