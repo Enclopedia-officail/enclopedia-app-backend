@@ -85,7 +85,7 @@ class FavoriteListView(generics.ListAPIView):
     def list(self, request):
         favorites = get_list_or_404(self.queryset, user=request.user)
         serializer = self.serializer_class(
-            favorites, many=True)
+            favorites, many=True, context={"request":request})
         return Response(serializer.data)
 
 class FavoriteDeleteView(generics.DestroyAPIView):

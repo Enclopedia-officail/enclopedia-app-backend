@@ -441,6 +441,18 @@ class ShippingNumberUpdateView(generics.UpdateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationShippingNumberSerializer
 
+    def update(self, request, pk, *args, **kwargs):
+        try:
+            data = request.data
+            instance = Reservation.objects.get(id=pk)
+            instance.status = data['status']
+            instance.shipping_number = data['shipping_number']
+            instance.save(update_fields=["status","shipping_number"])
+            serializer = self.serializer_class(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+#商品返却時のview
 class ReturnShippingNumberUpdateView(generics.UpdateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationReturnShippingNumberSerializer

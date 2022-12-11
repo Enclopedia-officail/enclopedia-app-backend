@@ -24,12 +24,6 @@ class ReservationShippingNumberSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ['id', 'status', 'shipping_number']
 
-    def update(self, instance, validated_data):
-        instance.status = validated_data.get('status', instance.status)
-        instance.shipping_number = validated_data.get('shipping_number', instance.shipping_number)
-        instance.save(update_fields=["status"])
-        return instance
-
 #返却時のreturn_shipping_numberとstatusのupdate
 class ReservationReturnShippingNumberSerializer(serializers.ModelSerializer):
     class Meta:

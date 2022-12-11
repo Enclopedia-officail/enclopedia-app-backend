@@ -684,9 +684,14 @@ def webhook_view(request):
             return Response(status=status.HTTP_404_NOT_FOUND)
     elif event['type'] == 'invoice.payment_succeeded':
     #サブスクリプション更新日の支払いが完了時に通知
+    #支払いが完了したことを伝えるメールと通知を送信し、update_dateを更新する
         data = event['data']['object']
         try:
+            today = datetime.datetime.now()
             stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+            stripe_account.update_date = today
+            stripe_account.save()
+            #taskから更新完了メールの送信
             return Response(status=status.HTTP_200_OK)
         except:
             logging.debug('通知に失敗')
@@ -695,6 +700,8 @@ def webhook_view(request):
         #サブスクリプション更新の支払いが失敗すると更新される
         data = event['data']['object']
         stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+        stripe_account.is_active = False
+        #支払いができなかったことを通知し一時的にサブスクリプションが利用できなくなることを通知する
         try:
             tasks.update_subscription_payment_fail_notification(stripe_account)
             stripe_account.is_active = False

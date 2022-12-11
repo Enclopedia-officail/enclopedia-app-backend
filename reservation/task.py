@@ -2,6 +2,7 @@ from celery import shared_task
 from notification.models import Notification
 from account_history.models import Favorite
 from .models import ReservationItem
+from .serializers import ReservationItemSerializer
 from django.conf import settings
 from django.core.mail import EmailMessage
 
@@ -28,10 +29,13 @@ def create_reservation_success_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
+        reservations = ReservationItem.objects.select_related('product', 'reservation').filter(reservation=instance)
+        serializer = ReservationItemSerializer(reservations, many=True)
         msg.template_id="d-d2348fb0b82847358b37250e34822cf4"
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
+            "items": serializer.data
         }
         msg.send(fail_silently=False)
     except:
@@ -42,7 +46,10 @@ def create_reservation_success_notification(instance):
 def create_reservation_failed_notification(instance):
     try:
         title='商品の予約が失敗しました。'
-        body='商品の予約に失敗しました、貸出中アイテムがある場合は予約をすることができません。現在貸出中のアイテムがあるか確認を行なって下さい、貸出中のアイテムがない場合には運営までご連絡頂けますようよろしくお願い致します。'
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+            商品の予約に失敗しました、貸出中アイテムがある場合は予約をすることができません。\
+            現在貸出中のアイテムがあるか確認を行なって下さい、\
+            貸出中のアイテムがない場合には運営までご連絡頂けますようよろしくお願い致します。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -57,8 +64,6 @@ def create_reservation_failed_notification(instance):
         msg.dynamic_template_data = {
             'first_name': instance.user.first_name,
             'last_name': instance.user.last_name,
-            'title':title,
-            'body':body
         }
         msg.send(fail_silently=False)
     except:
@@ -68,34 +73,39 @@ def create_reservation_failed_notification(instance):
 @shared_task
 def shipping_product_notification(instance):
     try:
+        print('スタート')
         title='Enclopediaからの発送が完了しました。'
-        body='発送が完了いたしました、商品到着までの間もうしばらくお待ち下さい。'
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+            発送が完了いたしました、商品到着までの間もうしばらくお待ち下さい。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
             body=body
         )
+        print('notification')
+        reservation_items = ReservationItem.objects.select_related('product', 'reservation').filter(reservation=instance)
+        serializer = ReservationItemSerializer(reservation_items, many=True)
         msg = EmailMessage(
             from_email=email,
             to=[instance.user.email]
         )
-        msg.template_id=''
+        msg.template_id='d-ee461e835eab4d51ad803cdf2f53055c'
         msg.dynamic_template_data = {
             'first_name': instance.user.first_name,
             'last_name': instance.user.last_name,
-            'title': title,
-            'body': body
+            'items': serializer.data
         }
         msg.send(fail_silently=False)
+        print('end')
     except:
         logger.error('商品発送通知　user:{}に通知失敗').format(instance.user.id)
-        pass
 
 @shared_task
 def return_product_notification(instance):
     try:
         title='お客様の返却発送手続きが完了しました。'
-        body='商品返却に運営が確認でき次第予約を再開することができます、確認までの間少々お待ち下さい。'
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+            商品返却に運営が確認でき次第予約を再開することができます、確認までの間少々お待ち下さい。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -121,7 +131,8 @@ def return_product_notification(instance):
 def return_product_success_notification(instance):
     try:
         title='商品の返却が完了しました'
-        body='この度はEnclopediaファッションレンタルサービスのご利用ありがとうございます、無事商品の返却が完了致したした。商品の予約が可能となりました、またのご利用お待ちしております。'
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスのご利用ありがとうございます。\
+            無事商品の返却が完了致したした。商品の予約が可能となりました、またのご利用お待ちしております。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.craete(
             user=instance.user,
             title=title,
@@ -149,13 +160,13 @@ def return_favorite_product_notification(instance):
     try:
         reservation_items = ReservationItem.objects.select_related('product', 'reservation').filter(reservation=instance)
         for item in reservation_items:
-            favorites = Favorite.objects.select_related('user', 'product').filter(product=item)
+            favorites = Favorite.objects.select_related('user', 'product').filter(product=item.product)
             for favorite in favorites:
                 if favorite.is_notification:
                     try:
                         title="商品が返却されました"
-                        body="この度はEnclopediaファッションレンタルサービスのご利用ありがとうございます。\
-                            お気に入りにした商品が返却されました、早速レンタルしてみませんか？"
+                        body="{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+                            お気に入りにした商品が返却されました、早速ですが気になっている商品をレンタルしてみませんか？".format(first_name=instance.user.first_name, last_name=instance.user.last_name)
                         Notification.objects.create(
                             user=favorite.user,
                             title=title,
@@ -166,10 +177,12 @@ def return_favorite_product_notification(instance):
                             from_email=email,
                             to=[favorite.user.email]
                         )
-                        msg.template_id=""
+                        msg.template_id="d-5b0f16837150416fa01a3027eefe2211 "
                         msg.dynamic_template_data = {
                             "first_name": favorite.user.first_name,
                             "last_name": favorite.user.last_name,
+                            "img": favorite.product.img,
+                            "product_name": favorite.product.product_name
                         }
                     except:
                         logger.error('お気に入り商品返却通知 user:{} 失敗'.format(favorite.user.id))
