@@ -208,6 +208,39 @@ class EmailUpdateView(generics.UpdateAPIView):
             message = {'message': '入力したEメールあるいはパスワードが正しくありません'}
             return Response(message, status=status.HTTP_401_UNAUTHORIZED)
 #suppressionsを利用しemailを特定の購読グループに追加する
+class SendgridRecipient(APIView):
+    #emailカラム変更時sendgridのメールアドレスも変更する
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = EmailSubscribe.objects.get(user=request.user)
+            secret = settings.SENDGRID_API_KEY
+            header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+            url = "https://api.sendgrid.com/v3/contactdb/recipients/{recipient_id}".format(recipient_id=instance.recipient_id)
+            #削除
+            requests.delete(url, headers=header)
+            url = "https://api.sendgrid.com/v3/contactdb/recipients"
+            data = [
+                        {
+                            "email": instance.email,
+                        }
+                    ]
+            response = requests.post(url, headers=header, data=json.dumps(data))
+            instance.recipient_id = response.json()["persisted_recipients"][0]
+            instance.save()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    #アカウント削除の際にsendgridに登録したemailも削除する必要がある
+    def delete(self, request):
+        try:
+            instance = EmailSubscribe.objects.get(user=request.user)
+            secret = settings.SENDGRID_API_KEY
+            header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+            url = "https://api.sendgrid.com/v3/contactdb/recipients/{recipient_id}".format(recipient_id=instance.recipient_id)
+            requests.delete(url, headers=header)    
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 class SendgridContactView(APIView):
 
     def post(self, request):
@@ -231,7 +264,27 @@ class SendgridContactView(APIView):
             message = {'message':'メール配信リスト登録が失敗しました。'}
             return Response(message, status=status.HTTP_404_NOT_FOUND)
     
-    
+    #emailを更新した際にsendgridも更新する
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = EmailSubscribe.objects.get(user=request.user)
+            secret = settings.SENDGRID_API_KEY
+            header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+            url = "https://api.sendgrid.com/v3/contactdb/recipients/{recipient_id}".format(recipient_id=instance.recipient_id)
+            #削除
+            requests.delete(url, headers=header)
+            url = "https://api.sendgrid.com/v3/contactdb/recipients"
+            data = [
+                        {
+                            "email": instance.email,
+                        }
+                    ]
+            response = requests.post(url, headers=header, data=json.dumps(data))
+            instance.recipient_id = response.json()["persisted_recipients"][0]
+            instance.save()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
     #group unsubscriptionに登録と削除でmarktingメールを送信するかどうか決定。
     def delete(self, request):
         #sendgrid 配信リストからuerのemailを削除するためのapiを叩く

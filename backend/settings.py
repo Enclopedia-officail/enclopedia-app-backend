@@ -154,7 +154,6 @@ CELERY_TIMEZONE = 'Asia/tokyo'
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesBackend',
 ]
-
 # ロックされるまでのログイン回数
 AXES_FAILURE_LIIMT = 5
 #ログイン解除にかかるまでの時間を指定

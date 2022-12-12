@@ -11,6 +11,7 @@ from product.serailizers import ProductSerializer
 from rest_framework import status
 import environ
 import logging
+import redis
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -68,12 +69,14 @@ class FavoriteUpdateView(generics.UpdateAPIView):
     serializer_class = FavoriteSerialzier
 
     def update(self, request, *args, **kwargs):
-        data = request.data['favorite']
-        favorite = get_object_or_404(Favorite, id=data['favorite_id'])
+        data = request.data
+        favorite = get_object_or_404(Favorite, id=data['favorite'])
         favorite.is_notification = data['is_notification']
         favorite.save()
-        serializer = self.serializer_class(favorite)
-        return Response(serializer, status=status.HTTP_200_OK)
+        favorites = get_list_or_404(self.queryset, user=request.user)
+        serializer = self.serializer_class(
+            favorites, many=True, context={"request":request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FavoriteListView(generics.ListAPIView):
@@ -99,7 +102,7 @@ class FavoriteDeleteView(generics.DestroyAPIView):
         message = 'お気に入りから削除しました'
         return Response(message, status=status.HTTP_200_OK)
 
-import redis
+
 
 def byte_to_str(byte_list: list) -> list:
     return [i.decode('utf8') for i in byte_list]

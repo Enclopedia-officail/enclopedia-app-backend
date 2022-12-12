@@ -15,7 +15,7 @@ class FavoriteListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
-        fields = ['id', 'product']
+        fields = ['id', 'product', 'is_notification']
         read_only_fields = ['user', 'product']
 
 
@@ -29,5 +29,5 @@ class FavoriteSerialzier(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
-        fields = ['id', 'user', 'product']
+        fields = ['id', 'user', 'product', 'is_notification']
         read_only_fields = ['user', 'product']
