@@ -47,6 +47,28 @@ class StripeConfigView(APIView):
         )
         return Response(prices.data)
 
+
+class StripeAccountView(APIView):
+    #アカウントがemail情報などを変えた時にこちらも更新をする
+    def put(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            customer = StripeAccount.objects.get(user_id=request.user)
+            stripe.Customer.modify(customer.customer_id, email=data['email'])
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+    #アカウントを削除する際にstripeに登録したCustomerも削除する
+    def delete(self, request, *args, **kwargs):
+        try:
+            stripe_account = get_object_or_404(StripeAccount, user_id=request.user)
+            stripe.Customer.delete(stripe_account.customer_id)
+            data = {"message": "stripeアカウントを完全に削除しました"}
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_200_OK)
+
+
 class StripeCustomerView(APIView):
     """enclopedia subscription function"""
     permission_classes = (IsAuthenticated,)

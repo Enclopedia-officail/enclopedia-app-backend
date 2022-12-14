@@ -6,6 +6,7 @@ from . import views
 app_name = 'subscription'
 
 urlpatterns = [
+    path('account', views.StripeAccountView.as_view()),
     path('subscription/user_info',
          views.StripeUserInfoView.as_view(), name="stripe_user_info"),
     path('subscription/config/',
