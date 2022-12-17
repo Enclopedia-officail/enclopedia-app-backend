@@ -12,5 +12,6 @@ urlpatterns = [
     path('items/', views.ReservationItemView.as_view(), name='reservation_item'),
     path('shipping/<uuid:pk>', views.ShippingNumberUpdateView.as_view()),
     path('return_shipping/<uuid:pk>', views.ReturnShippingNumberUpdateView.as_view()),
+    path('return_product_confirm/<uuid:pk>', views.ReturnProductConfirmView.as_view()),
     path('rental/product/confirm/', views.ReservationItemUserGet.as_view(), name='reservation_confirm')
 ]

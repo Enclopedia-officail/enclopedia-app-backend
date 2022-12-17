@@ -238,8 +238,11 @@ class SendgridRecipientView(APIView):
             secret = settings.SENDGRID_API_KEY
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
             url = "https://api.sendgrid.com/v3/contactdb/recipients/{recipient_id}".format(recipient_id=instance.recipient_id)
-            requests.delete(url, headers=header)    
-            return Response(status=status.HTTP_200_OK)
+            requests.delete(url, headers=header)   
+            data = {
+                'message': 'sendgridアカウント情報の削除に成功しました。'
+            } 
+            return Response(data, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 class SendgridContactView(APIView):

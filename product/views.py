@@ -39,7 +39,6 @@ class ProductSearch(generics.ListAPIView):
     def list(self, request):
         if request.GET['keyword']:
             keyword = request.GET['keyword']
-            logging.debug('keyword:{}'.format(keyword))
             search_product = get_list_or_404(
             self.queryset, Q(product_name__icontains=keyword) | Q(description__icontains=keyword))
             pagination_product = self.paginate_queryset(search_product)
@@ -1039,3 +1038,23 @@ class SearchWordView(APIView):
             data = []
             return Response(data, status=status.HTTP_200_OK)
 
+#文字からtagを複数取得
+class TagListAPIVIew(generics.ListAPIView):
+    serializer_class = serailizers.TagSerializer
+    queryset = Tag.objects.all()
+
+    def get(self, request):
+        data = request.GET['search_tag']
+        instance = get_list_or_404(self.queryset, tag_name__icontains=data)
+        serializer = self.serializer_class(instance, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+#複数指定したタグからproductを取得
+class TagListProductGetView(generics.ListAPIView):
+    serializer_class = serailizers.ProductSerializer
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price'
+    ).prefetch_related('tag').all()
+
+    def get(self, request):
+        pass

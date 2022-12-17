@@ -73,7 +73,6 @@ def create_reservation_failed_notification(instance):
 @shared_task
 def shipping_product_notification(instance):
     try:
-        print('スタート')
         title='Enclopediaからの発送が完了しました。'
         body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
             発送が完了いたしました、商品到着までの間もうしばらくお待ち下さい。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
@@ -82,7 +81,6 @@ def shipping_product_notification(instance):
             title=title,
             body=body
         )
-        print('notification')
         reservation_items = ReservationItem.objects.select_related('product', 'reservation').filter(reservation=instance)
         serializer = ReservationItemSerializer(reservation_items, many=True)
         msg = EmailMessage(
@@ -96,16 +94,15 @@ def shipping_product_notification(instance):
             'items': serializer.data
         }
         msg.send(fail_silently=False)
-        print('end')
     except:
         logger.error('商品発送通知　user:{}に通知失敗').format(instance.user.id)
 
 @shared_task
 def return_product_notification(instance):
     try:
-        title='お客様の返却発送手続きが完了しました。'
+        title='商品返却発送手続きが完了しました。'
         body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-            商品返却に運営が確認でき次第予約を再開することができます、確認までの間少々お待ち下さい。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
+            Enclopedia運営に商品が到着し問題がございませんでしたら次の商品をレンタルすることができます、確認までの間少々お時間いただきますことご了承ください。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -115,12 +112,10 @@ def return_product_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
-        msg.template_id=''
+        msg.template_id='d-4a4aa932361948579c66aa19a580590e'
         msg.dynamic_template_data = {
             'first_name': instance.user.first_name,
             'last_name': instance.user.last_name,
-            'title': title,
-            'body':body
         }
         msg.send(fail_silently=False)
     except:
@@ -132,8 +127,8 @@ def return_product_success_notification(instance):
     try:
         title='商品の返却が完了しました'
         body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスのご利用ありがとうございます。\
-            無事商品の返却が完了致したした。商品の予約が可能となりました、またのご利用お待ちしております。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
-        Notification.objects.craete(
+            返却して頂いた商品の確認が取れましたので商品のレンタルが可能となりました。またのご利用お待ちしております。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
+        Notification.objects.create(
             user=instance.user,
             title=title,
             body=body
@@ -142,12 +137,10 @@ def return_product_success_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
-        msg.template_id=''
-        msg.dynamice_template_data = {
+        msg.template_id='d-edcbef5a2982462aa1ab101e1b81da28'
+        msg.dynamic_template_data = {
             'first_name': instance.user.first_name,
             'last_name': instance.user.last_name,
-            'title': title,
-            'body': body
         }
         msg.send(fail_silently=False)
     except:
@@ -164,9 +157,9 @@ def return_favorite_product_notification(instance):
             for favorite in favorites:
                 if favorite.is_notification:
                     try:
-                        title="商品が返却されました"
+                        title="お気に入りに登録した商品が返却されました"
                         body="{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-                            お気に入りにした商品が返却されました、早速ですが気になっている商品をレンタルしてみませんか？".format(first_name=instance.user.first_name, last_name=instance.user.last_name)
+                            お気に入りにした商品が返却されました、早速ですが気になっている商品をレンタルしてみませんか？".format(first_name=favorite.user.first_name, last_name=favorite.user.last_name)
                         Notification.objects.create(
                             user=favorite.user,
                             title=title,
@@ -177,13 +170,13 @@ def return_favorite_product_notification(instance):
                             from_email=email,
                             to=[favorite.user.email]
                         )
-                        msg.template_id="d-5b0f16837150416fa01a3027eefe2211 "
+                        print(favorite.user.email)
+                        msg.template_id="d-5b0f16837150416fa01a3027eefe2211"
                         msg.dynamic_template_data = {
                             "first_name": favorite.user.first_name,
                             "last_name": favorite.user.last_name,
-                            "img": favorite.product.img,
-                            "product_name": favorite.product.product_name
                         }
+                        msg.send(fail_silently=False)
                     except:
                         logger.error('お気に入り商品返却通知 user:{} 失敗'.format(favorite.user.id))
                         pass

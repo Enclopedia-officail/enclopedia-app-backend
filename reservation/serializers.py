@@ -1,11 +1,7 @@
-from django.db.models.query_utils import Q
 from rest_framework import serializers
 from rest_framework.serializers import SerializerMethodField
 from .models import Reservation, ReservationItem
-from user.models import Account, Adress
-from product.models import Product, Variation
-from product.serailizers import ProductSerializer, VariationSerialzier
-from subscription.models import StripeAccount
+from product.serailizers import ProductSerializer
 
 
 class ReservationSerializr(serializers.ModelSerializer):
