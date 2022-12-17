@@ -1040,6 +1040,7 @@ class SearchWordView(APIView):
 
 #文字からtagを複数取得
 class TagListAPIVIew(generics.ListAPIView):
+    permission_classes = (AllowAny,)
     serializer_class = serailizers.TagSerializer
     queryset = Tag.objects.all()
 
@@ -1051,10 +1052,16 @@ class TagListAPIVIew(generics.ListAPIView):
 
 #複数指定したタグからproductを取得
 class TagListProductGetView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
     serializer_class = serailizers.ProductSerializer
     queryset = Product.objects.select_related(
     'category', 'brand', 'price'
     ).prefetch_related('tag').all()
 
     def get(self, request):
-        pass
+        tags = request.query_params.getlist('tags[]')
+        instance = self.queryset
+        for id in tags:
+            instance = instance.filter(tag__id=id)
+        serializer = self.serializer_class(instance, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

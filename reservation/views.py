@@ -2,7 +2,7 @@ from re import A
 from product.models import Product
 from .models import Reservation, ReservationItem
 from rest_framework.views import APIView
-from .serializers import ReservationSerializr, ReservationItemSerializer, ResrevationListSerializer, ReservationShippingNumberSerializer, ReservationReturnShippingNumberSerializer
+from .serializers import ReservationSerializer, ReservationItemSerializer, ResrevationListSerializer, ReservationShippingNumberSerializer, ReservationReturnShippingNumberSerializer
 from .serializers import  ReservationItemUserSerializer
 from rest_framework import generics
 from rest_framework import pagination
@@ -103,7 +103,7 @@ class ReservationRentalHalfYearView(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ReservationListView(generics.ListAPIView):
-    serializer_class = ReservationSerializr
+    serializer_class = ReservationSerializer
     queryset = Reservation.objects.select_related('user', 'adress').order_by('-reserved_start_date').all()
 
     def get(self, request):
@@ -461,7 +461,7 @@ class ReturnShippingNumberUpdateView(generics.UpdateAPIView):
 class ReturnProductConfirmView(generics.UpdateAPIView):
     permission_classes = (IsAdminUser,)
     queryset = Reservation.objects.all()
-    serializer_class = ReservationSerializr
+    serializer_class = ReservationSerializer
 
     def update(self, request, pk, *args, **kwargs):
         try:

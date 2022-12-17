@@ -79,7 +79,7 @@ class Tag(models.Model):
     tag_name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.tag_name
+        return self.id
 
 plan_choices = [
     ('rental', 'rental'),

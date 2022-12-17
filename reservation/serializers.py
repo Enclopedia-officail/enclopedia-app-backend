@@ -4,7 +4,7 @@ from .models import Reservation, ReservationItem
 from product.serailizers import ProductSerializer
 
 
-class ReservationSerializr(serializers.ModelSerializer):
+class ReservationSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
         choices=[0, 1, 2, 3, 4, 5]
     )
@@ -57,7 +57,7 @@ class ResrevationListSerializer(serializers.ModelSerializer):
 
 class ReservationItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
-    reservation = ReservationSerializr(read_only=True)
+    reservation = ReservationSerializer(read_only=True)
 
     class Meta:
         model = ReservationItem
