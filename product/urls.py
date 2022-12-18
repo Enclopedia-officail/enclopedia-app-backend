@@ -92,6 +92,7 @@ urlpatterns = [
     path('tag/price_order/', views.ProductTagPriceOrderView.as_view(), name="tag_price_order"),
     path('tag/price_order_desc/', views.ProductTagPriceOrderDescView.as_view(), name="tag_price_order_desc"),
     path('tag/list/', views.TagListProductGetView.as_view()),
+    path('tag/search/', views.TagListAPIVIew.as_view()),
     path('related/', views.RelatedProductListViwe.as_view(), name='related_product'),
     path('search_word/', views.SearchWordView.as_view()),
 ]

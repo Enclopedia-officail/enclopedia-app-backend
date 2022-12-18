@@ -1045,7 +1045,7 @@ class TagListAPIVIew(generics.ListAPIView):
     queryset = Tag.objects.all()
 
     def get(self, request):
-        data = request.GET['search_tag']
+        data = request.GET['tag']
         instance = get_list_or_404(self.queryset, tag_name__icontains=data)
         serializer = self.serializer_class(instance, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1060,8 +1060,9 @@ class TagListProductGetView(generics.ListAPIView):
 
     def get(self, request):
         tags = request.query_params.getlist('tags[]')
-        instance = self.queryset
+        products = self.queryset
         for id in tags:
-            instance = instance.filter(tag__id=id)
-        serializer = self.serializer_class(instance, many=True, context={"request": request})
+            products = products.filter(tag__id=id)
+        pagination_product = self.paginate_queryset(products)
+        serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)

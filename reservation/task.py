@@ -19,7 +19,8 @@ email = 'operation@enclopediai-info.com'
 def create_reservation_success_notification(instance):
     try:
         title='商品の予約が完了しました'
-        body='商品の予約が完了しました、発送まで3日程度を有しております。商品の到着まで今しばらくお待ち頂けますよう願います。'
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+            \n商品の予約が完了しました、発送まで2日程度のお時間を頂いております。商品の到着まで今しばらくお待ち頂けますよう願います。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -47,7 +48,7 @@ def create_reservation_failed_notification(instance):
     try:
         title='商品の予約が失敗しました。'
         body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-            商品の予約に失敗しました、貸出中アイテムがある場合は予約をすることができません。\
+            \n商品の予約に失敗しました、貸出中アイテムがある場合は予約をすることができません。\
             現在貸出中のアイテムがあるか確認を行なって下さい、\
             貸出中のアイテムがない場合には運営までご連絡頂けますようよろしくお願い致します。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
