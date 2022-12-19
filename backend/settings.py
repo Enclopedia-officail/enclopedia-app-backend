@@ -20,7 +20,7 @@ env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOST", default=['*'])
 CSRF_TRUSTED_ORIGINS = ['https://api.enclopedia-official.com']
