@@ -8,11 +8,15 @@ from product.models import Product
 class Warehouse(models.Model):
     warehouse_name = models.CharField(max_length=50)
     postalcode = models.CharField(max_length=50)
+    country = models.CharField(max_length=100, default='日本')
     prefecture = models.CharField(max_length=255)
     region = models.CharField(max_length=250)
     address = models.CharField(max_length=50)
     building_name = models.CharField(
         max_length=200)
+
+    def __str__(self):
+       return self.warehouse_name
 
 #productとは別に在庫を管理するためのtable
 
@@ -32,5 +36,6 @@ class Inventory(models.Model):
     classification = models.SmallIntegerField(choices=CLASSIFICATION, default=STORING)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+
 
 
