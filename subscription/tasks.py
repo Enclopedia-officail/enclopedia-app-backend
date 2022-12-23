@@ -21,9 +21,9 @@ def create_register_subscription_notification(instance):
     #サブスクリプションの登録を行った際の処理
     try:
         title = 'サブスクリプションの登録が完了しました'
-        body='{first_name}{last_name}様Enclopediaファッションレンタルサービスをご利用頂きありがとうございます。\
-        サブスクリプション{plan}プランへの登録が完了しました、\
-        早速商品をレンタルすることができます。'.format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name, plan=instance.plan)
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+        \nサブスクリプション{plan}プランへの登録が完了しました.\
+        \n早速商品をレンタルすることができます、引き続きEcnlopediaファッションレンタルサービスをお楽しみください。'.format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name, plan=instance.plan)
         Notification.objects.create(
             user=instance.user_id,
             title=title,
@@ -50,7 +50,8 @@ def cancel_subscription_notification(instance):
     try:
         cancel_date=instance.cancel_date.strftime('%Y年%m月%d日')
         title='サブスクリプションの解約が完了しました'
-        body='{first_name}{last_name}様{plan}プランの解約が完了しました。\
+        body='{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。 \
+            \n{plan}プランの解約が完了しました。\
             \n解約後ご利用のプランに関しましては{cancel_date}までご利用いただけます。\
             \n引き続きEnclopediaファッションレンタルサービスをよろしくお願い致します。'.format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name, plan=instance.plan, cancel_date=cancel_date)
         Notification.objects.create(

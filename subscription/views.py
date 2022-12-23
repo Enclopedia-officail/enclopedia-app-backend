@@ -22,7 +22,7 @@ import logging
 from . import tasks
 
 
-logging = logging.basicConfig(level=logging.DEBUG)
+logger = logging.basicConfig(level=logging.DEBUG)
 env = environ.Env()
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -295,7 +295,6 @@ class StripeCustomerView(APIView):
 
 class StripeCheckoutView(APIView):
     """fucntion related to onetime payment"""
-    # 現在userに貸仕出し中のアイテムがあれば返却後に貸出可能となる
     def post(self, request):
         data = request.data
         user = request.user
@@ -312,11 +311,9 @@ class StripeCheckoutView(APIView):
         reservations = Reservation.objects.select_related(
             'user', 'adress').filter(status__in=status_list)
 
-        # 一度にレンタルできる数巣を制限する必要がある
         cartitems = CartItem.objects.filter(cart_id=cart)
         subscription_user_info = StripeAccount.objects.select_related('user_id').get(user_id=user)
 
-        # 状態確認を行うためにresevationをここで作成しておく
         if (subscription_user_info.plan == plan == 'rental'):
             create_reservation = Reservation.objects.create(
                 user=user,
@@ -328,11 +325,9 @@ class StripeCheckoutView(APIView):
                 shipping_price=shipping_price
             )
             try:
-                #値が０の場合に[0]は参照できないのでerrorが発生する
                 if len(reservations) > 0:
                     raise
                 else:
-                # トランザクションで失敗すれば元に戻すようにする
                     with transaction.atomic():
                         for cartitem in cartitems:
                             product = get_object_or_404(
@@ -355,12 +350,8 @@ class StripeCheckoutView(APIView):
                                     'default_payment_method': payment_method
                                 }
                             )['id']
-
-                            #setupIntentを通じて支払いがformなしてできるようになっている。
-                        # customerが存在しなかった場合に作成する
                         else:
                             customer = subscription_user_info.customer_id
-                            # paymentIntentに関して支払い完了後にstateで支払い状態を確認するコードを書く
                         response = stripe.PaymentIntent.create(
                             customer=customer,
                             payment_method_types=['card'],
@@ -430,6 +421,56 @@ class StripeCheckoutView(APIView):
                     }
                 return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
+#複数のクレジットカード情報を取得
+class CreditInfoListView(APIView):
+
+    def get(self, request):
+        try:
+            customer = StripeAccount.objects.get(user_id=request.user)
+            stripe_customer = stripe.Customer.retrieve(customer.customer_id)
+            if customer.customer_id:
+                infos = stripe.PaymentMethod.list(
+                    customer=customer.customer_id,
+                    type="card"
+                ).data
+                card_infos = []
+                for info in infos:
+                    data = {
+                        'payment_method_id':info.id,
+                        'number': info.card.last4,
+                        'brand': info.card.brand,
+                        'exp_month': info.card.exp_month,
+                        'exp_year': info.card.exp_year,
+                    }
+                    card_infos.append(data)
+                
+                data = {
+                    'default_payment': stripe_customer.invoice_settings.default_payment_method,
+                    'cards': card_infos
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    def put(self, request):
+        user = request.user
+        data = request.data
+        try:
+            #デフォルトの情報を変更する
+            customer = StripeAccount.objects.get(user_id=user)
+            stripe.Customer.modify(
+                customer.customer_id,
+                invoice_settings ={
+                    'default_payment_method': data['payment_method']
+                }
+            )
+            message = {'message': 'クレジットカード情報の登録が完了しました。'}
+            return Response(message, status=status.HTTP_200_OK)
+        except:
+            message = {'message':'クレジットカード情報変更に失敗しました。'}
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
+
 class CreditInfoView(APIView):
     """edit credit cart infomation registered stripe"""
     def get(self, request):
@@ -465,7 +506,6 @@ class CreditInfoView(APIView):
         email = data['email']
         payment_method = request.data['payment_method']
         stripe_accout = StripeAccount.objects.get(user_id=request.user)
-        #setUp Intentでカード情報を登録してもpaymnetMethod.attachでuserと結びつけを行う必要がある。
         try:
             #cusotomerが作成されていない状態ですると初期支払い方法が登録される
             customer_data = stripe.Customer.list(email=email)
@@ -534,6 +574,7 @@ class CreditInfoView(APIView):
         data = request.data
         payment_mehtod= data['payment_method']
         try:
+            #デフォルトの情報を変更する
             customer = StripeAccount.objects.get(user_id=user)
             stripe.PaymentMethod.attach(
                 payment_mehtod,
@@ -656,9 +697,40 @@ class SetupIntentView(APIView):
         customer = StripeAccount.objects.get(user_id=user)
         info = stripe.SetupIntent.list(customer=customer.customer_id)
         payment_method =stripe.PaymentMethod.retrieve(info['data'][0].payment_method)
-        
         return Response(payment_method)
+
+    def post(self, request):
+        #クレジットカード情報を追加
+        data = request.data
+        customer = StripeAccount.objects.get(user_id=request.user)
+        try:
+            stripe.SetupIntent.create(
+                customer=customer.customer_id,
+                payment_method=data['payment_method']
+            )
+            message = {'message': 'クレジットカード情報を登録しました。'}
+            return Response(message, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
     
+    def put(self, request):
+        #カード更新時のpaymentMethod情報の変更
+        data = request.data
+        try:
+            stripe.PaymentMethod.update(
+                data['payment_method_id'],
+                card={
+                    'exp_month':data['exp_month'],
+                    'exp_year':data['exp_year']
+                }
+            )
+            data = {
+                'message': 'カード情報の更新に成功しました。'
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_200_OK)
+            
     def delete(self,request):
         user = request.user
         customer = StripeAccount.objects.get(user_id=user)
@@ -716,7 +788,7 @@ def webhook_view(request):
             #taskから更新完了メールの送信
             return Response(status=status.HTTP_200_OK)
         except:
-            logging.debug('通知に失敗')
+            logger.debug('通知に失敗')
             return Response(status=status.HTTP_200_OK)
     elif event['type'] == 'invoice.payment_failed':
         #サブスクリプション更新の支払いが失敗すると更新される
@@ -730,7 +802,7 @@ def webhook_view(request):
             stripe_account.save()
             return Response(status=status.HTTP_200_OK)
         except:
-            logging.debug('サブスクリプション登録情報更新に失敗')
+            logger.error('サブスクリプション登録情報更新に失敗')
             return Response(status=status.HTTP_200_OK)
     elif event['type'] == 'invoice.paid':
         #サブスクリプションの支払いが完了したことを通知する
@@ -740,11 +812,14 @@ def webhook_view(request):
             tasks.subscription_update_paid_success(stripe_account)
             return Response(status=status.HTTP_200_OK)
         except:
-            logging.debug('サブスクリプション更新の通知に失敗しました。')
+            logger.debug('サブスクリプション更新の通知に失敗しました。')
             return Response(status=status.HTTP_200_OK)
-        
+    elif event['type'] == 'payment_method.updated':
+        #カードの更新時の通知
+        data = event['data']['object']
+        stripe_account = StripeAccount.objects.get(customer_id=data.customer)
     else:
-        print('イベントのハンドリングに失敗しました {}'.format(event['type']))
+        logger.error('イベントのハンドリングに失敗しました {}'.format(event['type']))
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     return Response(success=True, status=status.HTTP_200_OK)

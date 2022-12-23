@@ -1,18 +1,18 @@
 from category.models import Category, Brand
 from django.db import models
-from django.urls import reverse
 from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user.models import Account
+import datetime
 import uuid
 
 def upload_img(instance, filename):
-
+    today = datetime.datetime.now()
     ext = filename.split('.')[-1]
     if str(ext) == 'jpg' or str(ext) == 'png':
-        return 'image_gallary/' + str(instance.product.id) + str(instance.id) + '.' + str(ext).lower()
+        return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'image_gallary/' + str(instance.product.id) + str(instance.id) + '.jpg'
+        return 'image_gallary/' + str(today) + str(instance.id) + '.jpg'
 
 def upload_review_img(instance, filename):
 
