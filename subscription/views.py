@@ -453,6 +453,20 @@ class CreditInfoListView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
+    def post(self, request):
+        #クレジットカード情報を追加
+        data = request.data
+        customer = StripeAccount.objects.get(user_id=request.user)
+        try:
+            stripe.PaymentMethod.attach(
+                data['payment_method'],
+                customer=customer.customer_id
+            )
+            data = {'message': 'クレジットカード情報を登録しました。'}
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
     def put(self, request):
         user = request.user
         data = request.data
@@ -465,24 +479,54 @@ class CreditInfoListView(APIView):
                     'default_payment_method': data['payment_method']
                 }
             )
-            message = {'message': 'クレジットカード情報の登録が完了しました。'}
-            return Response(message, status=status.HTTP_200_OK)
+            data = {'message': 'クレジットカード情報の登録が完了しました。'}
+            return Response(data, status=status.HTTP_200_OK)
         except:
-            message = {'message':'クレジットカード情報変更に失敗しました。'}
-            return Response(message, status=status.HTTP_404_NOT_FOUND)
+            data = {'message':'クレジットカード情報変更に失敗しました。'}
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+    
+    def delete(self, request):
+        #カスタマーにアタッチしたpaymentMethodを削除する
+        try:
+            payment_method = request.GET['payment_method']
+            print(payment_method)
+            stripe.PaymentMethod.detach(payment_method)
+            customer = StripeAccount.objects.get(user_id=request.user)
+            stripe_customer = stripe.Customer.retrieve(customer.customer_id)
+            if customer.customer_id:
+                infos = stripe.PaymentMethod.list(
+                    customer=customer.customer_id,
+                    type="card"
+                ).data
+                card_infos = []
+                for info in infos:
+                    data = {
+                        'payment_method_id':info.id,
+                        'number': info.card.last4,
+                        'brand': info.card.brand,
+                        'exp_month': info.card.exp_month,
+                        'exp_year': info.card.exp_year,
+                    }
+                    card_infos.append(data)
+                
+                data = {
+                    'default_payment': stripe_customer.invoice_settings.default_payment_method,
+                    'cards': card_infos
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 class CreditInfoView(APIView):
     """edit credit cart infomation registered stripe"""
     def get(self, request):
         #paymentmethodidも返すようにする
         customer = StripeAccount.objects.get(user_id=request.user)
+        stripe_customer = stripe.Customer.retrieve(customer.customer_id)
         if customer.customer_id:
             # クレジットカード情報を取得
-
-            info = stripe.PaymentMethod.list(
-                customer=customer.customer_id,
-                type="card"
-            ).data[0]
+            info = stripe.PaymentMethod.retrieve(stripe_customer.invoice_settings.default_payment_method)
 
             if info:
                 data = {
@@ -586,8 +630,8 @@ class CreditInfoView(APIView):
                     'default_payment_method':payment_mehtod
                 }
             )
-            message = {'message': 'クレジットカード情報の登録が完了しました。'}
-            return Response(message, status=status.HTTP_200_OK)
+            data = {'message': 'クレジットカード情報の登録が完了しました。'}
+            return Response(data, status=status.HTTP_200_OK)
         except:
             message = {'message':'クレジットカード情報変更に失敗しました。'}
             return Response(message, status=status.HTTP_404_NOT_FOUND)
@@ -708,8 +752,8 @@ class SetupIntentView(APIView):
                 customer=customer.customer_id,
                 payment_method=data['payment_method']
             )
-            message = {'message': 'クレジットカード情報を登録しました。'}
-            return Response(message, status=status.HTTP_200_OK)
+            data = {'message': 'クレジットカード情報を登録しました。'}
+            return Response(data, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
     
