@@ -309,7 +309,7 @@ class StripeCheckoutView(APIView):
 
         status_list = [1,3,4]
         reservations = Reservation.objects.select_related(
-            'user', 'adress').filter(status__in=status_list)
+            'user', 'adress').filter(status__in=status_list, user=request.user)
 
         cartitems = CartItem.objects.filter(cart_id=cart)
         subscription_user_info = StripeAccount.objects.select_related('user_id').get(user_id=user)
