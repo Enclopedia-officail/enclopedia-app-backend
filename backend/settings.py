@@ -6,9 +6,6 @@ import yaml
 import sentry_sdk
 import os
 
-with open('./config.yml', 'r') as config_file:
-    data = yaml.load(config_file, Loader=yaml.SafeLoader)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
@@ -86,8 +83,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email',
         ],
-        'PROVIDER_KEY': data['social_auth_google_key'],
-        'PROVIDER_SECRET_KEY': data['social_auth_google_secret'],
+        'PROVIDER_KEY': env('SOCIAL_AUTH_GOOGLE_KEY'),
+        'PROVIDER_SECRET_KEY': env('SOCIAL_AUTH_GOOGLE_SECRET'),
         'AUTH_PARAMS': {
             'access_type': 'online',
         }

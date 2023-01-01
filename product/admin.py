@@ -28,7 +28,7 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'tag_name')
 
 class SizeAdmin(admin.ModelAdmin):
-    list_display = ('product', 'product_product_name', 'size')
+    list_display = ('product', 'size')
     search_fields = ['product__id', 'product__product_name']
 
 admin.site.register(Product, ProductAdmin)
