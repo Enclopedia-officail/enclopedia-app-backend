@@ -71,7 +71,7 @@ class Price(models.Model):
     tax = models.FloatField(choices=taxes, blank=True, null=True)
 
     def __str__(self):
-        return str(self.price)
+        return str(self.price) + 'サイズ:' + str(self.shipping.size)
 
     def total_price(self):
         return (self.prince + self.shipping.price)*self.tax
