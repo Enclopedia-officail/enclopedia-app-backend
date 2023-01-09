@@ -74,7 +74,8 @@ INSTALLED_APPS = [
     'cart',
     'notification',
     'django_cleanup',
-    'storages'
+    'storages',
+    'inventory'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

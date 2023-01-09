@@ -99,7 +99,7 @@ gender_choice = [
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True, unique=True)
     product_name = models.CharField(max_length=100)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(max_length=500, blank=True)
     rating = models.DecimalField(
         max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
         validators=[MinValueValidator(0.1),
@@ -154,6 +154,7 @@ class Product(models.Model):
         return count
 
 cloth_size = (
+    ('XS', 'xs'),
     ('S', 's'),
     ('M', 'm'),
     ('L', 'l'),
@@ -171,7 +172,9 @@ class Size(models.Model):
     chest = models.IntegerField(blank=True, null=True)
     waist = models.IntegerField(blank=True, null=True)
     hip = models.IntegerField(blank=True, null=True)
+    rise = models.IntegerField(blank=True, null=True)
     inseam = models.IntegerField(blank=True, null=True)
+    hem_width = models.IntegerField(blank=True, null=True)
     sleeve_length = models.IntegerField(blank=True, null=True)
 
     def __str__(self):

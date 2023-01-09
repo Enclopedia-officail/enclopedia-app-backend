@@ -10,6 +10,7 @@ class ReservationAdmin(admin.ModelAdmin):
 class ReservationItemAdmin(admin.ModelAdmin):
     list_display=['id', 'product', 'quantity']
     search_fields = ['id', 'reservation__id']
+    raw_id_fields = ['product']
 
 admin.site.register(models.Reservation, ReservationAdmin)
 admin.site.register(models.ReservationItem, ReservationItemAdmin)

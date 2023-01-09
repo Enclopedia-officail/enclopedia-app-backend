@@ -6,6 +6,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     list_per_page = 100
     search_fields = ['id', 'product_name']
+    raw_id_fields = ['brand']
 
 class ImageGallaryAdmin(admin.ModelAdmin):
     list_display = ('id', 'product')
