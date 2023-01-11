@@ -173,6 +173,7 @@ class Size(models.Model):
     chest = models.IntegerField(blank=True, null=True)
     waist = models.IntegerField(blank=True, null=True)
     hip = models.IntegerField(blank=True, null=True)
+    rize = models.IntegerField(blank=True, null=True)
     inseam = models.IntegerField(blank=True, null=True)
     sleeve_length = models.IntegerField(blank=True, null=True)
 
