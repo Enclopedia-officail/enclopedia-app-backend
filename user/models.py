@@ -7,10 +7,10 @@ import uuid
 def upload_img(instance, filename):
 
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'profile/' + str(instance.user.id) + '.' + str(ext)
     else:
-        return 'profile/' + str(instance.user.id) + '.jpg'
+        return 'profile/' + str(instance.user.id) + '.webp'
 
 
 class AccountManager(BaseUserManager):
