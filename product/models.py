@@ -9,34 +9,35 @@ import uuid
 def upload_img(instance, filename):
     today = datetime.datetime.now()
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'image_gallary/' + str(today) + str(instance.id) + '.jpg'
+        return 'image_gallary/' + str(today) + str(instance.id) + '.webp'
 
 def upload_review_img(instance, filename):
 
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'review/' + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'review/' + str(instance.id) + '.jpg'
+        return 'review/' + str(instance.id) + '.webp'
 
 
 def upload_thumbnail(instance, filename):
 
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.' + str(ext).lower()
     else:
-        return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.jpg'
+        return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.webp'
 
 
 def upload_product(instance, filename):
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
-        return 'product/' + str(instance.id) + '.jpg'
-
+    if str(ext) == 'webp':
+         return 'product/' + str(instance.id) + '.' + str(ext).lower()
+    else:
+         return 'product/' + str(instance.id) + '.webp'
 
 # 配送料を決定するための
 shipping_size = [
