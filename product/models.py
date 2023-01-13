@@ -22,6 +22,16 @@ def upload_review_img(instance, filename):
     else:
         return 'review/' + str(instance.id) + '.webp'
 
+def upload_thumbnail(instance, filename):
+
+    ext = filename.split('.')[-1]
+    if str(ext) == 'webp':
+        return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.' + str(ext).lower()
+    else:
+        return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.webp'
+
+
+
 def upload_product(instance, filename):
     ext = filename.split('.')[-1]
     if str(ext) == 'webp':
