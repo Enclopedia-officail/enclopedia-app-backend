@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
 
@@ -148,6 +149,17 @@ class EmailSubscribe(models.Model):
             return self.user.username + '(購読中)'
         else:
             return self.user.username
+
+class Credibility(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    review = models.DecimalField(
+        max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(10.0)]
+    )
+
+    def __str__(self):
+        return str(self.review)
 
 class RandomNumber(models.Model):
     number = models.CharField(max_length=4, unique=True)

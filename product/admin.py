@@ -26,6 +26,7 @@ class ReviewRatingAdmin(admin.ModelAdmin):
 class PriceAdmin(admin.ModelAdmin):
     list_per_page = 100
     list_display = ('id', 'price', 'shipping')
+    search_fields = ['price']
 
 class ShippingAdmin(admin.ModelAdmin):
     list_display = ('id', 'shipping_company', 'shipping_method', 'size', 'shipping_price')

@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from product.models import Product, Variation
 from user.models import Account, Adress
 from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
 auth_user = settings.AUTH_USER_MODEL if getattr(
@@ -55,6 +56,7 @@ class Reservation(models.Model):
     shippingNumberRegex = RegexValidator(regex= r"^\d{12}$")
     shipping_number = models.CharField(validators=[shippingNumberRegex],max_length=15, null=True, blank=True)
     return_shipping_number = models.CharField(validators=[shippingNumberRegex],max_length=15, null=True, blank=True)
+    return_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -68,6 +70,12 @@ class ReservationItem(models.Model):
     quantity = models.IntegerField(default=1)
     is_canceled = models.BooleanField(default=False)
     cancel_date = models.DateTimeField(blank=True, null=True)
+    review = models.DecimalField(
+        max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(10.0)]
+    )
+
 
     def __unicode__(self):
         return self.id

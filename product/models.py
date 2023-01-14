@@ -43,6 +43,7 @@ def upload_product(instance, filename):
 shipping_size = [
     ('ネコポス', 'ネコポス'),
     ('宅急便コンパクト', '宅急便コンパクト'),
+    (0, 0),
     (60, 60),
     (80, 80),
     (100, 100),
@@ -54,7 +55,7 @@ shipping_size = [
 class Shipping(models.Model):
     shipping_company = models.CharField(max_length=30)
     shipping_method = models.CharField(max_length=30)
-    size = models.IntegerField(blank=True, choices=shipping_size)
+    size = models.CharField(max_length=100, blank=True, choices=shipping_size)
     shipping_price = models.IntegerField()
 
     def __str__(self):
@@ -103,7 +104,7 @@ class Product(models.Model):
     description = models.TextField(max_length=500, blank=True)
     rating = models.DecimalField(
         max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
-        validators=[MinValueValidator(0.1),
+        validators=[MinValueValidator(0),
                     MaxValueValidator(5.0)]
     )
     review_count = models.IntegerField(blank=True, null=True, default=0)
