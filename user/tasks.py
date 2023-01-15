@@ -120,7 +120,7 @@ def password_reset(instance, reset_password_token):
     msg.dynamic_template_data = {
         "first_name":reset_password_token.user.first_name,
         "last_name":reset_password_token.user.last_name,
-        "Weblink":'{domain}/{url}?token={token}'.format(domain=env("FRONTEND_URL"),url='/password_reset/password/confirm', token=reset_password_token.key)
+        "Weblink":'{domain}/{url}?token={token}'.format(domain=env("FRONTEND_URL"),url='password_reset/password/confirm', token=reset_password_token.key)
     }
     msg.send(fail_silently=False)
 
