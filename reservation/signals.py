@@ -1,6 +1,7 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from .models import Reservation
+from .models import Reservation, ReservationItem
+from user.models import Credibility
 from . import task
 import logging
 logger = logging.getLogger(__name__)
@@ -10,8 +11,6 @@ logger = logging.getLogger(__name__)
 def reservation_notification(sender, instance, update_fields, *args, **kwargs):
     try:
         if("status" in list(update_fields)):
-            print("start")
-            print(instance.status)
             if int(instance.status) == 1:
                 task.create_reservation_success_notification(instance)
             elif int(instance.status) == 2:
@@ -24,6 +23,17 @@ def reservation_notification(sender, instance, update_fields, *args, **kwargs):
                 task.return_product_success_notification(instance)
                 task.return_favorite_product_notification(instance)
             else:
-                print('end')
+                pass
     except:
         logger.error('notification通知に失敗しました。')
+
+@receiver(pre_save, sender=ReservationItem)
+def review_return_item(sender, instance, update_fileds, *args, **kwargs):
+    try:
+        if("review" in list(update_fileds)):
+            task.return_product(instance)
+        else:
+            pass
+    except:
+        logger.error('ユーザの信用度評価の計算に失敗しました。')
+            

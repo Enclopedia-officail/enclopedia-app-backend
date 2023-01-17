@@ -2,6 +2,7 @@ from celery import shared_task
 from notification.models import Notification
 from account_history.models import Favorite
 from .models import ReservationItem
+from user.models import Credibility
 from .serializers import ReservationItemSerializer
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -185,4 +186,11 @@ def return_favorite_product_notification(instance):
         logger.error('お気に入り商品返却通知 user:{} 失敗'.format(favorite.user.id))
         pass
 
-
+@shared_task
+def return_product(instance):
+    number = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2,-0.1, 1]
+    user = instance.reservation.user
+    review = instance.review
+    credibility = Credibility.objects.select_related('user').get(user=user)
+    credibility.review += number[review]
+    credibility.save()

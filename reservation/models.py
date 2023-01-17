@@ -70,10 +70,10 @@ class ReservationItem(models.Model):
     quantity = models.IntegerField(default=1)
     is_canceled = models.BooleanField(default=False)
     cancel_date = models.DateTimeField(blank=True, null=True)
-    review = models.DecimalField(
-        max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
+    review = models.IntegerField(
+        blank=True, null=True,
         validators=[MinValueValidator(0),
-                    MaxValueValidator(10.0)]
+                    MaxValueValidator(10)]
     )
 
 
