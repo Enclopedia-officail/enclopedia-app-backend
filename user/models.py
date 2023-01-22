@@ -102,14 +102,13 @@ class Adress(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.OneToOneField(
         Account, on_delete=models.CASCADE, default=None, null=True)
-    country = models.CharField(max_length=255, default='Japan')
-    prefecture = models.CharField(max_length=255, default=None, null=True)
+    country = models.CharField(max_length=250, default='Japan')
+    prefecture = models.CharField(max_length=250, default=None, null=True)
     region = models.CharField(max_length=250, default=None, null=True)
-    address = models.CharField(max_length=50, default=None, null=True)
+    address = models.CharField(max_length=250, default=None, null=True)
     building_name = models.CharField(
-        max_length=200, default=None, blank=True, null=True)
+        max_length=250, default=None, blank=True, null=True)
     postalcode = models.CharField(max_length=50, default=None, null=True)
-    phoneNumberRegex = RegexValidator(regex = r"^\d{8,16}$")
 
     def __str__(self):
         return str(self.user)

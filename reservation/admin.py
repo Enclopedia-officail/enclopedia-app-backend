@@ -6,7 +6,7 @@ import datetime
 class ReservationAdmin(admin.ModelAdmin):
     list_display=('id', 'user', 'reserved_start_date', 'status', 'is_reserved')
     list_filter = ['reserved_start_date']
-    search_fields = ['id']
+    search_fields = ['id', 'status']
     
     def save_model(self, request, obj, form, change):
         update_fields = []
