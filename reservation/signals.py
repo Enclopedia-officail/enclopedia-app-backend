@@ -28,12 +28,13 @@ def reservation_notification(sender, instance, update_fields, *args, **kwargs):
         logger.error('notification通知に失敗しました。')
 
 @receiver(pre_save, sender=ReservationItem)
-def review_return_item(sender, instance, update_fileds, *args, **kwargs):
+def review_return_item(sender, instance, update_fields, *args, **kwargs):
     try:
-        if("review" in list(update_fileds)):
+        if("review" in list(update_fields)):
             task.return_product(instance)
         else:
             pass
     except:
         logger.error('ユーザの信用度評価の計算に失敗しました。')
+        pass
             
