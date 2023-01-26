@@ -1,4 +1,3 @@
-from re import A
 from product.models import Product
 from .models import Reservation, ReservationItem
 from rest_framework.views import APIView
