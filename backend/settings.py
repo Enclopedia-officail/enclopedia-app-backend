@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'analytics',
     'category',
-    'core',
     'user.apps.AccountConfig',
     'product',
     'corsheaders',
@@ -75,7 +74,8 @@ INSTALLED_APPS = [
     'notification',
     'django_cleanup',
     'storages',
-    'inventory'
+    'inventory',
+    'buying'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

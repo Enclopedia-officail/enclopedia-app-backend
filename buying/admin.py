@@ -8,12 +8,12 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ['id', 'user__id', 'payment_id']
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'address', 'order_id', 'total_price', 'tax', 'status', 'ip', 'created_at', 'updated_at')
+    list_display = ('id', 'user', 'payment', 'address', 'order_id', 'total_price', 'tax', 'status', 'ip', 'created_at', 'updated_at')
     list_per_page = 100
     search_fields = ['id', 'user__id', 'order_d']
 
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'payment', 'order', 'reservation_item', 'quantity', 'is_ordered', 'created_at', 'updated_at')
+    list_display = ('id', 'order', 'reservation_item', 'quantity', 'is_ordered', 'created_at', 'updated_at')
     list_per_page = 100
     search_fields = ['id', 'reservation_item__id', 'reservation_item__product__id']
 

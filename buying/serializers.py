@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Payment, Order, OrderItem
-from user.serializers import AccountSerializer
+from user.serializers import AccountSerializer, AdressEditSerializer
 from reservation.serializers import ReservationItemSerializer
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -8,21 +8,23 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'user', 'payment_method', 'payment_id', 'created_at']
+        fields = ['id', 'user', 'payment_method', 'payment_id', 'amount_paid', 'created_at']
 
 class OrderSerializer(serializers.ModelSerializer):
     user = AccountSerializer(read_only=True)
-    
+    address = AdressEditSerializer(read_only=True)
+    payment = PaymentSerializer(read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'total_price', 'created_at']
+        fields = ['id', 'user', 'address', 'payment', 'order_id', 'total_price', 'tax', 'status', 'created_at']
 
 #orderitemが確定しユーザが商品を購入した場合には返却されなくて済むうにする
 class OrderItemSerializer(serializers.ModelSerializer):
-    payment = PaymentSerializer(read_only=True)
+
     order = OrderSerializer(read_only=True)
+    user = AccountSerializer(read_only=True)
     reservation_item = ReservationItemSerializer
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'payment', 'order', 'reservation_item', 'created_at', 'updated_at']
+        fields = ['id','user', 'payment', 'order', 'reservation_item', 'is_ordered', 'created_at', 'updated_at']

@@ -6,6 +6,10 @@ from rest_framework.test import APITestCase
 
 #各テストケースを記述していくのだが
 
+class OrderItemListTest(TestCase):
+    def order_item_list(self):
+        pass
+
 class CreatePaymentTest(TestCase):
     def create_payment(self):
         pass
