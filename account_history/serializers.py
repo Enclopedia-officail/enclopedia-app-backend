@@ -3,7 +3,6 @@ from product.serailizers import ProductSerializer
 from .models import Favorite
 from user.models import Account
 from product.models import Product
-from product.serailizers import ProductSerializer
 import logging
 
 

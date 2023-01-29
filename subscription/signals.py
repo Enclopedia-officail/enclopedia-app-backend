@@ -15,7 +15,6 @@ def send_subscription_register_email(sender, instance, update_fields, *args, **k
         else:
             pass
     except:
-        print('except')
         logger.error('サブスクリプション登録通知 user:{} emailが送信できませんでした'.format(instance.user_id.id))
         pass
 
@@ -23,7 +22,6 @@ def send_subscription_register_email(sender, instance, update_fields, *args, **k
 @receiver(pre_save, sender=StripeAccount)
 def send_subscription_update_email(sender, instance, update_fields, *args, **kwargs):
     try:
-        print('update')
         if("update_date" in list(update_fields)):
             print('start')
             update_subscriptoin_notification(instance)

@@ -10,9 +10,9 @@ import environ
 env = environ.Env()
 
 class GoogleLoginView(SocialLoginView):
-    authentication_classes = []  # disable authentication
+    authentication_classes = []
     adapter_class = GoogleOAuth2Adapter
-    callback_url = env('FRONTEND_URL')  # サーバ切り替え時に変更
+    callback_url = env('FRONTEND_URL')
     client_class = OAuth2Client
 
 @csrf_exempt

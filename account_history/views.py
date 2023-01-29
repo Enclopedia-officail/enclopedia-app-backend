@@ -8,7 +8,6 @@ from rest_framework import generics
 from .serializers import FavoriteSerialzier, FavoriteListSerializer
 from product.models import Product
 from product.serailizers import ProductSerializer
-from rest_framework import status
 import environ
 import logging
 import redis
@@ -110,6 +109,7 @@ def byte_to_str(byte_list: list) -> list:
 class BrowsingHistoryView(APIView):
     redisClient = redis.StrictRedis(host=env("REDIS_LOCATION"), port=6379, db=0)
     def get(self, request):
+
         try:
             user = request.user
             products_id = byte_to_str(list(self.redisClient.smembers(str(user.id))))
@@ -123,6 +123,7 @@ class BrowsingHistoryView(APIView):
                 
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
+            
     def post(self, request):
         #userごとに履歴を作成できるようにする方法をとる
         #検索履歴に対しても保存ができるようにする

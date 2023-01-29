@@ -1,6 +1,5 @@
-from django.urls import path, include
-from django.urls.resolvers import URLPattern
-from .views import GoogleLoginView, RefreshTokenView
+from django.urls import path
+from .views import GoogleLoginView
 
 urlpatterns = [
     path('google/', GoogleLoginView.as_view(), name='socialaccount_signup'),

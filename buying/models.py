@@ -1,5 +1,5 @@
 from django.db import models
-from user.models import Account
+from user.models import Account, Adress
 from reservation.models import ReservationItem
 import uuid
 # Create your models here.
@@ -10,7 +10,8 @@ import uuid
 CREDIT = 'credit'
 STORE = 'store'
 method = (
-    (CREDIT, _('credit')),
+    (CREDIT, 'credit'),
+    (STORE, 'convenience_store_payment')
 )
 
 #reservationのなからのみ購入することができるようにする
@@ -18,9 +19,10 @@ class Payment(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True
     )
-    user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='order_account')
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='payment_account')
     payment_method = models.CharField(max_length=100, choices=method)
     payment_id = models.CharField(max_length=200, blank=True, null=True)
+    amount_paid = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -33,11 +35,20 @@ class Order(models.Model):
         ('Completed', 'completed'),
         ('Cancelled', 'cancelled')
     )
+
+    COUNTRY = (
+        ('JP', 0.1)
+    )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='order_account')
+    address = models.ForeignKey(Adress, on_delete=models.CASCADE, related_name='order_address')
     order_id = models.CharField(max_length=100, unique=True)
     total_price = models.IntegerField()
+    tax = models.FloatField(choices=COUNTRY)
+    status = models.CharField(choices=STATUS)
+    ip = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
     def __str__(self):
@@ -45,9 +56,12 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='order_product_payment'),
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='order_item_account')
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='order_payment'),
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_item')
     reservation_item = models.ForeignKey(ReservationItem, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

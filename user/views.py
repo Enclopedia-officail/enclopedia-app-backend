@@ -265,7 +265,7 @@ class SendgridContactView(APIView):
                 'message': 'sendgridのメール配信リストへの登録が完了しました。'
             }
             return Response(response, status=status.HTTP_200_OK)
-        except :
+        except:
             message = {'message':'メール配信リスト登録が失敗しました。'}
             return Response(message, status=status.HTTP_404_NOT_FOUND)
     
@@ -311,7 +311,7 @@ class SendgridContactView(APIView):
         data = request.data
         try:
             secret = settings.SENDGRID_API_KEY
-            header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+            header = {'Content-type': 'application/json', 'Authorization': 'Bearer ' + secret}
             url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=data['recipient_id'])
             response = requests.delete(url, headers=header)
             return Response(response, status.HTTP_200_OK)
@@ -326,7 +326,7 @@ class SendgridSuppressionsView(APIView):
         try:
             email = request.data['email']
             secret = settings.SENDGRID_API_KEY
-            header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+            header = {'Content-type': 'application/json', 'Authorization':'Bearer ' + secret}
             print(header)
             url = 'https://api.sendgrid.com/v3/asm/groups/{}/suppressions'.format('30160')
             data = {
@@ -338,7 +338,7 @@ class SendgridSuppressionsView(APIView):
             return Response(response, status=status.HTTP_200_OK)
 
         except:
-            message = {'message':'メール配信リストへの登録に失敗しました。'}
+            message = {'message': 'メール配信リストへの登録に失敗しました。'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
             
     #配信停止リストから削除することで配信を再度開始する
@@ -346,12 +346,12 @@ class SendgridSuppressionsView(APIView):
         email  = request.GET['mail']
         try:
             secret = settings.SENDGRID_API_KEY
-            header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+            header = {'Content-type': 'application/json', 'Authorization': 'Bearer ' + secret}
             url = 'https://api.sendgrid.com/v3/asm/groups/{}/suppressions/{}'.format('30160', email)
             response = requests.delete(url, headers=header)
             return Response(response, status=status.HTTP_200_OK)
         except:
-            message = {'message':'メール配信リストからの削除に失敗しました。'}
+            message = {'message': 'メール配信リストからの削除に失敗しました。'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
 #アカウント作成をすると自動的に登録されるようになっている

@@ -5,12 +5,14 @@ from reservation.serializers import ReservationItemSerializer
 
 class PaymentSerializer(serializers.ModelSerializer):
     user = AccountSerializer(read_only=True)
+
     class Meta:
         model = Payment
         fields = ['id', 'user', 'payment_method', 'payment_id', 'created_at']
 
 class OrderSerializer(serializers.ModelSerializer):
     user = AccountSerializer(read_only=True)
+    
     class Meta:
         model = Order
         fields = ['id', 'user', 'order_id', 'total_price', 'created_at']

@@ -4,17 +4,17 @@ import uuid
 def upload_img(instance, filename):
     ext = filename.split('.')[-1]
     if str(ext) == 'webp':
-         return 'brand_icon/' + str(instance.id) + '.' + str(ext).lower()
+        return 'brand_icon/' + str(instance.id) + '.' + str(ext).lower()
     else:
-         return 'brand_icon/' + str(instance.id) + '.webp'
+        return 'brand_icon/' + str(instance.id) + '.webp'
 
 
 def upload_type(instance, filename):
     ext = filename.split('.')[-1]
     if str(ext) == 'webp':
-         return 'type/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
+        return 'type/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
     else:
-         return 'type/' + str(instance.category_name) + str(instance.id) + '.webp'
+        return 'type/' + str(instance.category_name) + str(instance.id) + '.webp'
 
 def upload_category(instance, filename):
     ext = filename.split('.')[-1]
