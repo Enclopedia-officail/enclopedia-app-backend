@@ -2,7 +2,6 @@ from datetime import timedelta
 from pathlib import Path
 from sentry_sdk.integrations.django import DjangoIntegration
 import environ
-import yaml
 import sentry_sdk
 import os
 
@@ -19,7 +18,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['https://api.enclopedia-official.com', 'https://www.enclopedia-official.com']
+ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://api.enclopedia-official.com']
 
 # STRIPE API KEY
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
     #'rest_framework_simplejwt.token_blacklist',
+    'core',
     'rest_auth',
     'django.contrib.sites',
     'allauth',

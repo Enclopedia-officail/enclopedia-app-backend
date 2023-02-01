@@ -9,9 +9,6 @@ from closet.models import Cloth
 
 # Create your views here.
 
-
-# cartを作成してを渡す
-
 class CartCreateView(generics.CreateAPIView):
     queryset = Cart.objects.select_related('user').all()
     serializer_class = CartSerializer

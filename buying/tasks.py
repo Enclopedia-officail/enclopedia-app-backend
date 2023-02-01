@@ -14,7 +14,7 @@ def order_completed_notification(instance):
         title = '注文した商品のお支払いが完了しました。'
         body = '{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
             \n注文した{item}のお支払いが完了しました。\
-            \n購入したアイテムに関してまして返却は必要ありませんのでそのままご利用ください。'
+            \n購入したアイテムに関してまして返却は必要ありませんのでそのままご利用いただけます。'
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -24,11 +24,12 @@ def order_completed_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
-        msg.tempalte_id=''
+        msg.tempalte_id='d-c8278c649a7047f28c6dc7e6eecb44f7'
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
-            "item": instance.reservation_item.product.product_name
+            "item": instance.reservation_item.product.product_name,
+            "img": instance.reservation_item.product.img
         }
         msg.send(fail_silently=False)
     except:
@@ -53,7 +54,7 @@ def order_canceled_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
-        msg.tempalte_id=''
+        msg.tempalte_id='d-5418a157f4a94645a8f71ffb8926da65'
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,

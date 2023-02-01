@@ -4,7 +4,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from djago.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from subscription.models import StripeAccount
 
 import stripe
@@ -16,27 +16,28 @@ logger = logging.basicConfig(level=logging.DEBUG)
 #返却期限が過ぎていないこと
 #購入が確定した場合に返却しなくても問題がないことがわかるようにする
 
-def create_payment(user, payment_method, payment_id):
-    instance = Payment.objects.select_related('order_account').create(user=user)
-    return instance
-
 class BuyingReservationItemView(APIView):
-    def post(self, request):
-        data = request.data
-        user = request.user
-        stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
+    def payment(self, data, customer):
         response = stripe.PaymentIntent.create(
-            customer = stripe_customer,
+            customer = customer,
             payment_method_types=data['payment_method'],
             payment_method = data['payment_id'],
             currency="jpy",
             amount=data['total_price'],
             confirm=True
         )
+        return response
+
+    def post(self, request):
+        data = request.data
+        user = request.user
+        stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
+        response = self.payment(data, stripe_customer)
         instance = get_object_or_404(Order.objects.select_related('order_account', 'order_address', 'order_payment'),id = data['order_id'])
         if response.data['status'] == 'succeded':
             #支払いが成功した場合
             instance.status = 'Completed'
+            instance.order_id = response.id
             instance.save(update_fields=['status', 'updated_at'])
             message = {
                 'message': '商品の購入が完了しました'
@@ -76,7 +77,6 @@ class OrderItemCreateView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-
 class OrderCreateView(generics.CreateAPIView):
 
     queryset = Order.objects.select_related('order_account', 'order_address').all()
@@ -84,14 +84,19 @@ class OrderCreateView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
+        ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+        if ip_address:
+            client_ip = ip_address.split(',')[0]
+        else:
+            client_ip = request.META.get('REMOTE_ADDR')
         instance = Order.objects.select_related('order_account', 'order_address').create(
             user = request.user,
-            address__id = data['address'],
+            payment_id = data['payment'],
             order_id = data['order_id'],
             total_price = data['total_price'],
             tax = data['tax'],
             status = 'Accepted',
-            ip = "requestからipを首藤",
+            ip = client_ip
         )
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -105,7 +110,7 @@ class PaymentCreateView(generics.CreateAPIView):
         data = request.data
         instance = Payment.objects.select_related('payment_account').create(
             user = user,
-            payment_method = data['payment_met,hod'],
+            payment_method = data['payment_method'],
             payment_id = data['payment_id'],
             amount_paid = data['amount_paid'],
         )

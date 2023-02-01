@@ -46,6 +46,9 @@ class ProductSearch(generics.ListAPIView):
                 pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
         
 class ProductSearchReviewListView(generics.ListAPIView):
     """get products in highest order of rating"""
@@ -64,6 +67,9 @@ class ProductSearchReviewListView(generics.ListAPIView):
             pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchReviewDescListView(generics.ListAPIView):
     """get products in lowest order of rating"""
@@ -82,6 +88,9 @@ class ProductSearchReviewDescListView(generics.ListAPIView):
             pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchFavoriteListView(generics.ListAPIView):
     """get products in order of number of favorites"""
@@ -101,6 +110,9 @@ class ProductSearchFavoriteListView(generics.ListAPIView):
             pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchFavoriteDescListView(generics.ListAPIView):
     """get products in order of least number of favorites"""
@@ -120,6 +132,9 @@ class ProductSearchFavoriteDescListView(generics.ListAPIView):
             pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchOrderReservationView(generics.ListAPIView):
     """get products in order of number of reservations"""
@@ -139,6 +154,9 @@ class ProductSearchOrderReservationView(generics.ListAPIView):
             pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 #予約数の少ない順位並び替えを行う
 class ProductSearchOrderReservationDescView(generics.ListAPIView):

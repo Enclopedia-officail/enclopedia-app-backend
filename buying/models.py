@@ -1,5 +1,5 @@
 from django.db import models
-from user.models import Account, Adress
+from user.models import Account
 from reservation.models import ReservationItem
 import uuid
 # Create your models here.
@@ -26,7 +26,7 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.id
+        return self.payment_id
 
 class Order(models.Model):
     STATUS = (
@@ -40,7 +40,6 @@ class Order(models.Model):
     )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='order_account', null=True)
-    address = models.ForeignKey(Adress, on_delete=models.SET_NULL, related_name='order_address', null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, related_name='order_payment', null=True)
     order_id = models.CharField(max_length=100, unique=True)
     total_price = models.IntegerField()
