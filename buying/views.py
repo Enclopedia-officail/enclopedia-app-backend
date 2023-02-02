@@ -51,7 +51,7 @@ class BuyingReservationItemView(APIView):
             return Response(error, status=status.HTTP_404_NOT_FOUND)
 
 class OrderItemListView(generics.ListAPIView):
-    queryset = OrderItem.objects.select_related('order_item_account', 'order_item').all()
+    queryset = OrderItem.objects.select_related('user', 'order', 'reservation_item').all()
     serializer_class = OrderItemSerializer
 
     def get(self, request):
@@ -60,13 +60,13 @@ class OrderItemListView(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrderItemCreateView(generics.CreateAPIView):
-    queryset = OrderItem.objects.select_related('order_item_account', 'order_payment', 'order_item').all()
+    queryset = OrderItem.objects.select_related('user', 'order', 'reservation_item').all()
     serializer_class = OrderItemSerializer
 
     def post(self, request, *args, **kwargs):
         user = request.user
         data = request.data
-        instance = OrderItem.objects.select_related('order_item_account', 'order_item').create(
+        instance = OrderItem.objects.select_related('user', 'order', 'reservation_item').create(
             user = user,
             order__id = data['order_id'],
             reservation_item__id = data['reservation_item_id'],

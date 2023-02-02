@@ -19,7 +19,6 @@ ORDER_ITEM_LIST_URL = reverse('buying:order_item_list')
 class OrderItemListTest(TestCase):
     #orderItemテーブルをリストで取得するためのテスト
     def setUp(self) -> None:
-
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
             first_name = 'test',
@@ -29,8 +28,8 @@ class OrderItemListTest(TestCase):
             phone_number = '09001610001',
             password = 'testpass123',
         )
-        self.clien.force_authenticate(self.user)
-        self.address = Adress.objects.select_related('user').create()
+        self.client.force_authenticate(self.user)
+        self.address = Adress.objects.get(user=self.user)
         self.payment = models.Payment.objects.create(
             user = self.user,
             payment_method='card',
@@ -48,7 +47,14 @@ class OrderItemListTest(TestCase):
         )
 
         self.product = Product.objects.select_related('category', 'brand', 'price').create(
-
+            product_name = 'sample',
+            description = 'sample',
+            rating = 5.0,
+            review_count = 1,
+            stock = 1,
+            img = 'https://test.com',
+            is_available = True,
+            is_subscription = 'rental',
         )
 
         self.reservation = Reservation.objects.select_related('user', 'adress').create(
@@ -66,19 +72,23 @@ class OrderItemListTest(TestCase):
 
         self.reservation_item = ReservationItem.objects.select_related('product', 'reservation').create(
             reservation = self.reservation,
-            product = self.product
+            product = self.product,
+            quantity = 1,
         )
 
-        models.OrderItem.objects.select_related('order_item_account', 'order_item').create(
+        models.OrderItem.objects.select_related('user', 'order', 'reservation_item').create(
             user=self.user,
             order = self.order,
-
+            reservation_item = self.reservation_item,
+            quantity = 1,
+            is_ordered = True,
         )
     
     def test_order_item_list(self):
         res = self.client.get(ORDER_ITEM_LIST_URL, many=True)
+        print(res)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(type(res.data), list)
+        self.assertEqual(res.data[0]['is_ordered'], True)
 
 class CreatePaymentTest(TestCase):
     #payment modelが使用できるかのテスト
