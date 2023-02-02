@@ -8,13 +8,14 @@ from user.models import Adress
 from reservation.models import Reservation, ReservationItem
 from .. import models
 from .. import serializers
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 #api url
 
 CREATE_PAYMNET_URL = reverse('buying:payment')
 CREATE_ORDER_URL = reverse('buying:order')
 ORDER_ITEM_LIST_URL = reverse('buying:order_item_list')
+BUYING_URL = reverse('buying:buying')
 
 class OrderItemListTest(TestCase):
     #orderItemテーブルをリストで取得するためのテスト
@@ -193,11 +194,14 @@ class BuyingPaymentSuccessTest(TestCase):
             status = 'Accepted',
             ip = '127.0.0.7'
         )
-
-    @patch('buying.BuyingReservationItemView.payment', return_value={'data':{'status' : 'succeded'}})
+    #responseオブジェクトを指定する
+    @patch('buying.views.BuyingReservationItemView.payment', MagicMock(return_value={'data':{'status': 'succeded'}}))
     def test_buying(self):
-        #paymentIntentでの支払い部分をmockで置き換えを行う
-        pass
+        data = {
+            'order_id': self.order.id
+        }
+        res = self.client.post(BUYING_URL, data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
 class BuyingPaymentFailedTest(TestCase):
 
@@ -211,6 +215,27 @@ class BuyingPaymentFailedTest(TestCase):
             phone_number = '09001610001',
             password = 'testpass123',
         )
-    @patch('BuyingReservationItemView.payment', return_value={'data':{'status' : 'requires_payment_method'}})
+        self.client.force_authenticate(self.user)        
+        self.payment = models.Payment.objects.create(
+            user = self.user,
+            payment_method='card',
+            payment_id = 'fdsa08ca7st',
+            amount_paid = 1000
+        )
+        self.order = models.Order.objects.create(
+            user = self.user,
+            payment = self.payment,
+            order_id = 'payment',
+            total_price = 1000,
+            tax = 0.1,
+            status = 'Accepted',
+            ip = '127.0.0.7'
+        )
+    #mock return value部分にはresponseオブジェクトを指定する
+    @patch('buying.views.BuyingReservationItemView.payment', MagicMock(return_value=dict(data = dict(status = 'succeded'))))
     def test_payment_failed(self):
-        pass
+        data = {
+            'order_id': self.order.id
+        }
+        res = self.client.post(BUYING_URL, data)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)

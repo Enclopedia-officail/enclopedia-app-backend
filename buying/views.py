@@ -33,7 +33,7 @@ class BuyingReservationItemView(APIView):
         user = request.user
         stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
         response = self.payment(data, stripe_customer)
-        instance = get_object_or_404(Order.objects.select_related('order_account', 'order_address', 'order_payment'),id = data['order_id'])
+        instance = get_object_or_404(Order.objects.select_related('user', 'payment'),id = data['order_id'])
         if response.data['status'] == 'succeded':
             #支払いが成功した場合
             instance.status = 'Completed'
