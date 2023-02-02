@@ -124,6 +124,7 @@ class Product(models.Model):
         Tag, related_name='product_tag', null=True, blank=True)
     price = models.ForeignKey(
         Price, on_delete=models.CASCADE, related_name='products', blank=True, null=True)
+    buying_price = models.IntegerField(default=0)
     gender = models.CharField(
         max_length=10, choices=gender_choice, default="mens")
 
