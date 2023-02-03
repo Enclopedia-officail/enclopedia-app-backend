@@ -34,16 +34,16 @@ class BuyingReservationItemView(APIView):
         stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
         response = self.payment(data, stripe_customer)
         instance = get_object_or_404(Order.objects.select_related('user', 'payment'),id = data['order_id'])
-        if response.data['status'] == 'succeded':
+        if response['status'] == 'succeeded':
             #支払いが成功した場合
             instance.status = 'Completed'
-            instance.order_id = response.id
+            instance.order_id = data['order_id']
             instance.save(update_fields=['status', 'updated_at'])
             message = {
                 'message': '商品の購入が完了しました'
             }
             return Response(message, status=status.HTTP_200_OK)
-        elif response.data['status'] == 'requires_payment_method':
+        elif response['status'] == 'requires_payment_method':
             #支払いが失敗した場合の処理
             instance.status = 'Cancelled'
             instance.save(update_fields=['status', 'updated_at'])

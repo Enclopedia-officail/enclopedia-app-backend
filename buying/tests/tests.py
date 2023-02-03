@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.http import JsonResponse
 from product.models import Product
 from user.models import Adress
 from reservation.models import Reservation, ReservationItem
@@ -195,7 +196,7 @@ class BuyingPaymentSuccessTest(TestCase):
             ip = '127.0.0.7'
         )
     #responseオブジェクトを指定する
-    @patch('buying.views.BuyingReservationItemView.payment', MagicMock(return_value={'data':{'status': 'succeded'}}))
+    @patch('buying.views.BuyingReservationItemView.payment', MagicMock(return_value={'status': 'succeeded'}))
     def test_buying(self):
         data = {
             'order_id': self.order.id
@@ -232,7 +233,7 @@ class BuyingPaymentFailedTest(TestCase):
             ip = '127.0.0.7'
         )
     #mock return value部分にはresponseオブジェクトを指定する
-    @patch('buying.views.BuyingReservationItemView.payment', MagicMock(return_value=dict(data = dict(status = 'succeded'))))
+    @patch('buying.views.BuyingReservationItemView.payment', MagicMock(return_value={'status': 'requires_payment_method'}))
     def test_payment_failed(self):
         data = {
             'order_id': self.order.id
