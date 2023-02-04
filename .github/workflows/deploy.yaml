@@ -1,0 +1,11 @@
+---
+name: name
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-lint:
+  runs-on: ubuntu-latest

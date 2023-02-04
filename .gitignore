@@ -55,6 +55,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+.DS_Store
+backend/.DS_Store
 
 # Translations
 *.mo
@@ -95,6 +97,7 @@ celerybeat.pid
 
 # Environments
 .env
+local.env
 .venv
 env/
 venv/
@@ -127,3 +130,4 @@ dmypy.json
 cython_debug/
 dump.rdb
 info.log
+.travis.yaml

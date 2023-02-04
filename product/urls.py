@@ -89,8 +89,10 @@ urlpatterns = [
     path('tag/reservation_order_desc/', views.ProductTagReservationDescView.as_view()),
     path('tag/category/', views.ProductTagCategoryView.as_view(), name="tag_category"),
     path('tag/type/', views.ProductTagTypeView.as_view(), name='tag_type'),
-    path('tag/price_order/', cache_page(views.ProductTagPriceOrderView.as_view(),TIME_OUTS_1DAY), name="tag_price_order"),
-    path('tag/price_order_desc/', cache_page(views.ProductTagPriceOrderDescView.as_view(),TIME_OUTS_1DAY), name="tag_price_order_desc"),
+    path('tag/price_order/', views.ProductTagPriceOrderView.as_view(), name="tag_price_order"),
+    path('tag/price_order_desc/', views.ProductTagPriceOrderDescView.as_view(), name="tag_price_order_desc"),
+    path('tag/list/', views.TagListProductGetView.as_view()),
+    path('tag/search/', views.TagListAPIVIew.as_view()),
     path('related/', views.RelatedProductListViwe.as_view(), name='related_product'),
-    path('search_word/', cache_page(views.SearchWordView.as_view(), TIME_OUTS_1DAY))
+    path('search_word/', views.SearchWordView.as_view()),
 ]

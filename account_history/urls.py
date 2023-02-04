@@ -20,6 +20,7 @@ urlpatterns = [
          name='favorite_create'),
     path('favorite/list/',
          views.FavoriteListView.as_view(), name='favorite'),
+    path('favorite/update/', views.FavoriteUpdateView.as_view()),
     path('favorite/delete/<int:pk>', views.FavoriteDeleteView.as_view(),
          name='favorite_delete'),
     path('browsing', views.BrowsingHistoryView.as_view()),

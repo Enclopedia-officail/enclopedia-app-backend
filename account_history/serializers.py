@@ -3,7 +3,6 @@ from product.serailizers import ProductSerializer
 from .models import Favorite
 from user.models import Account
 from product.models import Product
-from product.serailizers import ProductSerializer
 import logging
 
 
@@ -15,7 +14,7 @@ class FavoriteListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
-        fields = ['id', 'product']
+        fields = ['id', 'product', 'is_notification']
         read_only_fields = ['user', 'product']
 
 
@@ -29,5 +28,5 @@ class FavoriteSerialzier(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
-        fields = ['id', 'user', 'product']
+        fields = ['id', 'user', 'product', 'is_notification']
         read_only_fields = ['user', 'product']

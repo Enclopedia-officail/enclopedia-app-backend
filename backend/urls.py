@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/reservation/', include('reservation.urls')),
     path('api/notification/', include('notification.urls')),
     path('api/analytics/', include('analytics.urls')),
+    path('api/buying/', include('buying.urls')),
     path('api/password_reset/',
          include('django_rest_passwordreset.urls'), name='password_reset'),
     path('sentry-debug/', trigger_error),

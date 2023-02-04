@@ -15,7 +15,6 @@ def send_subscription_register_email(sender, instance, update_fields, *args, **k
         else:
             pass
     except:
-        print('except')
         logger.error('サブスクリプション登録通知 user:{} emailが送信できませんでした'.format(instance.user_id.id))
         pass
 
@@ -23,7 +22,6 @@ def send_subscription_register_email(sender, instance, update_fields, *args, **k
 @receiver(pre_save, sender=StripeAccount)
 def send_subscription_update_email(sender, instance, update_fields, *args, **kwargs):
     try:
-        print('update')
         if("update_date" in list(update_fields)):
             print('start')
             update_subscriptoin_notification(instance)
@@ -46,16 +44,3 @@ def send_subscription_cancel_email(sender, instance, update_fields, *args, **kwa
     except:
         logger.error('サブスクリプション解約通知 user:{} emailが送信できませんでした')
         pass
-
-"""
-@receiver(pre_save, sender=StripeAccount)
-#支払いの通知に失敗した時に通知を行うようにする
-def send_fail_payment_notification(sneder, instance, update_fields, *args, **kwargs):
-    try:
-        if("is_active" in list(update_fields) & instance.is_active == False):
-            pass
-        else:
-            pass
-    except:
-        logger.error('支払い延滞催促通知送信　user:{} 通知送信に失敗しました'.format(instance.user_id.id))
-"""

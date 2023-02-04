@@ -1,57 +1,61 @@
 from category.models import Category, Brand
 from django.db import models
-from django.urls import reverse
 from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user.models import Account
+import datetime
 import uuid
 
 def upload_img(instance, filename):
-
+    today = datetime.datetime.now()
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
-        return 'image_gallary/' + str(instance.product.id) + str(instance.id) + '.' + str(ext).lower()
+    if str(ext) == 'webp':
+        return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'image_gallary/' + str(instance.product.id) + str(instance.id) + '.jpg'
+        return 'image_gallary/' + str(today) + str(instance.id) + '.webp'
 
 def upload_review_img(instance, filename):
 
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'review/' + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'review/' + str(instance.id) + '.jpg'
-
+        return 'review/' + str(instance.id) + '.webp'
 
 def upload_thumbnail(instance, filename):
 
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.' + str(ext).lower()
     else:
-        return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.jpg'
+        return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.webp'
+
 
 
 def upload_product(instance, filename):
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
-        return 'product/' + str(instance.id) + '.jpg'
-
+    if str(ext) == 'webp':
+         return 'product/' + str(instance.id) + '.' + str(ext).lower()
+    else:
+         return 'product/' + str(instance.id) + '.webp'
 
 # 配送料を決定するための
 shipping_size = [
-    (60, 60),
-    (80, 80),
-    (100, 100),
-    (120, 120),
-    (140, 140),
-    (160, 160),
+    ('ネコポス', 'ネコポス'),
+    ('宅急便コンパクト', '宅急便コンパクト'),
+    ('0', '0'),
+    ('60', '60'),
+    ('80', '80'),
+    ('100', '100'),
+    ('120', '120'),
+    ('140', '140'),
+    ('160', '160'),
 ]
 
 class Shipping(models.Model):
     shipping_company = models.CharField(max_length=30)
     shipping_method = models.CharField(max_length=30)
-    size = models.IntegerField(blank=True, choices=shipping_size)
+    size = models.CharField(max_length=100, blank=True, choices=shipping_size)
     shipping_price = models.IntegerField()
 
     def __str__(self):
@@ -69,7 +73,7 @@ class Price(models.Model):
     tax = models.FloatField(choices=taxes, blank=True, null=True)
 
     def __str__(self):
-        return str(self.price)
+        return str(self.price) + 'サイズ:' + str(self.shipping.size)
 
     def total_price(self):
         return (self.prince + self.shipping.price)*self.tax
@@ -97,10 +101,10 @@ gender_choice = [
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True, unique=True)
     product_name = models.CharField(max_length=100)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(max_length=500, blank=True)
     rating = models.DecimalField(
         max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
-        validators=[MinValueValidator(0.1),
+        validators=[MinValueValidator(0),
                     MaxValueValidator(5.0)]
     )
     review_count = models.IntegerField(blank=True, null=True, default=0)
@@ -152,6 +156,7 @@ class Product(models.Model):
         return count
 
 cloth_size = (
+    ('XS', 'xs'),
     ('S', 's'),
     ('M', 'm'),
     ('L', 'l'),
@@ -169,7 +174,9 @@ class Size(models.Model):
     chest = models.IntegerField(blank=True, null=True)
     waist = models.IntegerField(blank=True, null=True)
     hip = models.IntegerField(blank=True, null=True)
+    rise = models.IntegerField(blank=True, null=True)
     inseam = models.IntegerField(blank=True, null=True)
+    hem_width = models.IntegerField(blank=True, null=True)
     sleeve_length = models.IntegerField(blank=True, null=True)
 
     def __str__(self):

@@ -25,7 +25,7 @@ class ProductGetView(generics.RetrieveAPIView):
     def get(self, request, pk=None):
         product = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(
-        product)
+        product, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ProductSearch(generics.ListAPIView):
@@ -39,14 +39,16 @@ class ProductSearch(generics.ListAPIView):
     def list(self, request):
         if request.GET['keyword']:
             keyword = request.GET['keyword']
-            logging.debug('keyword:{}'.format(keyword))
             search_product = get_list_or_404(
             self.queryset, Q(product_name__icontains=keyword) | Q(description__icontains=keyword))
             pagination_product = self.paginate_queryset(search_product)
             serializer = self.serializer_class(
-                pagination_product, many=True)
+                pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
         
 class ProductSearchReviewListView(generics.ListAPIView):
     """get products in highest order of rating"""
@@ -62,9 +64,12 @@ class ProductSearchReviewListView(generics.ListAPIView):
             product_name__icontains=keyword) | Q(description__iexact=keyword))
             pagination_product = self.paginate_queryset(products)
             serializer = self.serailizer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchReviewDescListView(generics.ListAPIView):
     """get products in lowest order of rating"""
@@ -80,9 +85,12 @@ class ProductSearchReviewDescListView(generics.ListAPIView):
             product_name__icontains=keyword) | Q(description__iexact=keyword))
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchFavoriteListView(generics.ListAPIView):
     """get products in order of number of favorites"""
@@ -99,9 +107,12 @@ class ProductSearchFavoriteListView(generics.ListAPIView):
             Q(product_name__icontains=keyword) | Q(description__iexact=keyword))
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchFavoriteDescListView(generics.ListAPIView):
     """get products in order of least number of favorites"""
@@ -118,9 +129,12 @@ class ProductSearchFavoriteDescListView(generics.ListAPIView):
             Q(product_name__icontains=keyword) | Q(description__iexact=keyword))
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ProductSearchOrderReservationView(generics.ListAPIView):
     """get products in order of number of reservations"""
@@ -137,9 +151,12 @@ class ProductSearchOrderReservationView(generics.ListAPIView):
             Q(product_name__icontains=keyword) | Q(description__iexact=keyword))
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            message = "検索キーワードが見当たりませんでした"
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 #予約数の少ない順位並び替えを行う
 class ProductSearchOrderReservationDescView(generics.ListAPIView):
@@ -157,7 +174,7 @@ class ProductSearchOrderReservationDescView(generics.ListAPIView):
             Q(product_name__icontains=keyword) | Q(description__iexact=keyword))
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         else:
@@ -179,7 +196,7 @@ class ProductSearchPriceView(generics.ListAPIView):
             self.queryset, Q(product_name__icontains=keyword) | Q(description__iexact=keyword), is_subscription__in=['rental', 'basic'])
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         else:
@@ -201,7 +218,7 @@ class ProductSearchPriceDescView(generics.ListAPIView):
             self.queryset, Q(product_name__icontains=keyword) | Q(description__iexact=keyword), is_subscription__in=['rental', 'basic'])
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         else:
@@ -223,7 +240,7 @@ class ProductSearchCategoryListView(generics.ListAPIView):
             product_name__icontains=keyword) | Q(description__iexact=keyword), category=category)
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
 
@@ -243,7 +260,7 @@ class ProductSearchTypeListView(generics.ListAPIView):
             products = get_list_or_404(self.queryset, 
             Q(product_name__icontains=keyword) | Q(description__iexact=keyword),category__in=categorys)
             pagination_product = self.paginate_queryset(products)
-            serializer = self.serializer_class(pagination_product, many=True)
+            serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         else:
@@ -262,7 +279,7 @@ class ProductTagListView(generics.ListAPIView):
         product = get_list_or_404(self.queryset, tag__id=tag)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -278,7 +295,7 @@ class ProudctTagRatingView(generics.ListAPIView):
         product = get_list_or_404(self.queryset, tag__id=tag)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -294,7 +311,7 @@ class ProductTagRatingDescView(generics.ListAPIView):
         product = get_list_or_404(self.queryset, tag__id=tag)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True
+        pagination_product, many=True, context={"request": request}
         )
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
@@ -313,7 +330,7 @@ class ProductTagFavoriteView(generics.ListAPIView):
             Count('favorite_product')).order_by('-favorite_product__count', '-created_at'), tag__id=tag)
             pagination_product = self.paginate_queryset(product)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         except:
@@ -334,7 +351,7 @@ class ProductTagReservationView(generics.ListAPIView):
             )
             pagination_product = self.paginate_queryset(product)
             serializer = self.serializer_class(
-                pagination_product, many=True
+                pagination_product, many=True, context={"request": request}
             )
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
@@ -356,7 +373,7 @@ class ProductTagReservationDescView(generics.ListAPIView):
             )
             pagination_product = self.paginate_queryset(product)
             serializer = self.serializer_class(
-                pagination_product, many=True
+                pagination_product, many=True, context={"request": request}
             )
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
@@ -376,7 +393,7 @@ class ProductTagFavoriteDescView(generics.ListAPIView):
         Count('favorite_product')).order_by('favorite_product__count', '-created_at'), tag__id=tag)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -394,7 +411,7 @@ class ProductTagPriceOrderView(generics.ListAPIView):
             product = self.queryset.filter(tag__id=tag, is_subscription__in=['rental', 'basic'])
             pagination_product = self.paginate_queryset(product)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         except:
@@ -415,7 +432,7 @@ class ProductTagPriceOrderDescView(generics.ListAPIView):
             product = self.queryset.filter(tag__id=tag, is_subscription__in=['rental', 'basic'])
             pagination_product = self.paginate_queryset(product)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         except:
@@ -438,7 +455,7 @@ class ProductTagCategoryView(generics.ListAPIView):
         self.queryset, tag__id=tag, category=category)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -459,7 +476,7 @@ class ProductTagTypeView(generics.ListAPIView):
                 self.queryset, tag__id=tag, category__in=categorys
             )
             pagination_product = self.paginate_queryset(products)
-            serializer = self.serializer_class(pagination_product, many=True)
+            serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         except:
@@ -480,7 +497,7 @@ class ProductListView(generics.ListAPIView):
         products = get_list_or_404(self.queryset)
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -495,7 +512,7 @@ class ProductReviewListView(generics.ListAPIView):
         product = get_list_or_404(self.queryset)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -510,7 +527,7 @@ class ProductReviewDescListView(generics.ListAPIView):
         product = get_list_or_404(self.queryset)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -526,7 +543,7 @@ class FavoriteProductView(generics.ListAPIView):
         Count('favorite_product')).order_by('-favorite_product__count', '-created_at')
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -542,7 +559,7 @@ class FavoriteProductDescView(generics.ListAPIView):
         Count('favorite_product')).order_by('favorite_product__count', '-created_at')
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -557,7 +574,7 @@ class ProductOrderReservationView(generics.RetrieveAPIView):
         Count('reservationitem')).order_by('-reservationitem__count', '-created_at')
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -573,7 +590,7 @@ class ProductOrderDescReservationView(generics.RetrieveAPIView):
         Count('reservationitem')).order_by('reservationitem__count', '-created_at')
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -589,7 +606,7 @@ class ProductPriceOrderView(generics.ListAPIView):
         products = get_list_or_404(self.queryset, is_subscription__in=['rental', 'basic'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -605,7 +622,7 @@ class ProductPriceDescOrderView(generics.ListAPIView):
         products = get_list_or_404(self.queryset, is_subscription__in=['rental', 'basic'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -622,7 +639,7 @@ class ProductCategoryView(generics.ListAPIView):
         products = get_list_or_404(self.queryset, category=category)
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response((result.data))
 
@@ -639,7 +656,7 @@ class ProductTypeView(generics.ListAPIView):
             categorys = type.type.all()
             products = get_list_or_404(self.queryset, category__in=categorys)
             pagination_product = self.paginate_queryset(products)
-            serializer = self.serializer_class(pagination_product, many=True)
+            serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
         except:
@@ -662,7 +679,7 @@ class ProductBrandView(generics.ListAPIView):
             self.queryset, brand_id=request.GET['brand'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializers_class(
-            pagination_product, many=True
+            pagination_product, many=True, context={"request": request}
         )
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
@@ -680,7 +697,7 @@ class ProductBrandReviewListView(generics.ListAPIView):
         self.queryset, brand_id=request.GET['brand'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -697,7 +714,7 @@ class ProductBrandReviewDescListView(generics.ListAPIView):
         self.queryset, brand_id=request.GET['brand'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -714,7 +731,7 @@ class ProducBrandFavoriteView(generics.ListAPIView):
         Count('favorite_product')).order_by('-favorite_product__count', '-created_at'), brand_id=request.GET['brand'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -732,7 +749,7 @@ class ProducBrandFavoriteDescView(generics.ListAPIView):
         Count('favorite_product')).order_by('favorite_product__count', '-created_at'), brand_id=request.GET['brand'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -752,7 +769,7 @@ class ProductBrandReservationView(generics.ListAPIView):
             brand=brand)
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
 
@@ -772,7 +789,7 @@ class ProductBrandReservationDescView(generics.ListAPIView):
             brand=brand)
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-            pagination_product, many=True)
+            pagination_product, many=True, context={"request": request})
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
 
@@ -791,7 +808,7 @@ class ProductBrandPriceView(generics.ListAPIView):
             self.queryset, brand_id=brand, is_subscription__in=['rental', 'basic'])
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-                pagination_product, many=True
+                pagination_product, many=True, context={"request": request}
             )
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
@@ -811,7 +828,7 @@ class ProductBrandPriceDescView(generics.ListAPIView):
             self.queryset, brand_id=brand, is_subscription__in=['rental', 'basic'])
             pagination_product = self.paginate_queryset(products)
             serializer = self.serializer_class(
-                pagination_product, many=True
+                pagination_product, many=True, context={"request": request}
             )
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
@@ -830,7 +847,7 @@ class ProductBrandCategoryView(generics.ListAPIView):
         category_id=request.GET['category'])
         pagination_product = self.paginate_queryset(products)
         serializer = self.serailizer_class(
-        pagination_product, many=True)
+        pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
 
@@ -851,7 +868,7 @@ class ProductBrandTypeView(generics.ListAPIView):
         )
         pagination_product = self.paginate_queryset(products)
         serializer = self.serializer_class(
-            pagination_product, many=True
+            pagination_product, many=True, context={"request": request}
         )
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
@@ -866,7 +883,7 @@ class ProductSizeView(generics.ListAPIView):
 
     def list(self, request, product=None):
         size = get_list_or_404(self.queryset, product=product)
-        serializer = self.serializer_class(size, many=True)
+        serializer = self.serializer_class(size, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 # tagからproductを取得する
@@ -898,7 +915,7 @@ class RelatedProductListViwe(generics.ListAPIView):
         product = request.GET['product']
         product_info = get_object_or_404(self.queryset, id=product)
         products = get_list_or_404(self.queryset, brand=product_info.brand, category=product_info.category, stock__gte=1)
-        serializer = self.serializer_class(products[:10], many=True)
+        serializer = self.serializer_class(products[:10], many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class VariationGetView(generics.ListAPIView):
@@ -911,7 +928,7 @@ class VariationGetView(generics.ListAPIView):
 
     def list(self, request, product=None):
         variation = get_list_or_404(self.queryset, product=product)
-        serializer = self.serializer_class(variation, many=True)
+        serializer = self.serializer_class(variation, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ImageGallaryView(generics.ListAPIView):
@@ -925,7 +942,7 @@ class ImageGallaryView(generics.ListAPIView):
     def list(self, request, product):
         images = get_list_or_404(self.queryset, product=product)
         serializer = self.serializer_class(
-        images, many=True)
+        images, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ReviewRatingCreateView(generics.CreateAPIView):
@@ -1039,3 +1056,31 @@ class SearchWordView(APIView):
             data = []
             return Response(data, status=status.HTTP_200_OK)
 
+#文字からtagを複数取得
+class TagListAPIVIew(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = serailizers.TagSerializer
+    queryset = Tag.objects.all()
+
+    def get(self, request):
+        data = request.GET['tag']
+        instance = get_list_or_404(self.queryset, tag_name__icontains=data)
+        serializer = self.serializer_class(instance, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+#複数指定したタグからproductを取得
+class TagListProductGetView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = serailizers.ProductSerializer
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price'
+    ).prefetch_related('tag').all()
+
+    def get(self, request):
+        tags = request.query_params.getlist('tags[]')
+        products = self.queryset
+        for id in tags:
+            products = products.filter(tag__id=id)
+        pagination_product = self.paginate_queryset(products)
+        serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

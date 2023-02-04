@@ -1,15 +1,13 @@
-from unicodedata import category
 from rest_framework.response import Response
 from .serializers import CategorySerializer, BrandSerializer, TypeSerializer
 from .models import Category, Brand, Type
 from product.models import Product
 from product.serailizers import ProductSerializer
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-from product.serailizers import ProductSerializer
 from django.shortcuts import get_list_or_404
-from django.db.models import Q
 import logging
 
 # Create your views here.
@@ -37,13 +35,11 @@ class CategoryListView(generics.ListAPIView):
     def get(self, request):
         try:
             id = request.GET['type']
-            print(id)
             type = Type.objects.prefetch_related('type').get(id=id)
             categorys = type.type.all()
-            print(categorys)
             serializer = self.serializer_class(categorys, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except:
+        except ObjectDoesNotExist:
             data = {'message': 'アイテムを取得できませんでした'}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
 

@@ -12,7 +12,8 @@ class AccountsAdmin(UserAdmin):
                     'email', 'data_joined', 'last_login', 'is_active')
 
     filter_horizontal = ()
-    list_filter = ()
+    list_filter = []
+    search_fields = ['email']
     fieldsets = ()
 
 

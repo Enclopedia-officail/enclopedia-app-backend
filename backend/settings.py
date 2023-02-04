@@ -2,12 +2,8 @@ from datetime import timedelta
 from pathlib import Path
 from sentry_sdk.integrations.django import DjangoIntegration
 import environ
-import yaml
 import sentry_sdk
 import os
-
-with open('./config.yml', 'r') as config_file:
-    data = yaml.load(config_file, Loader=yaml.SafeLoader)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,9 +16,9 @@ env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOST", default=['*'])
+ALLOWED_HOSTS = ['api.enclopedia-official.com', 'www.enclopedia-official.com']
 CSRF_TRUSTED_ORIGINS = ['https://api.enclopedia-official.com']
 
 # STRIPE API KEY
@@ -52,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
     #'rest_framework_simplejwt.token_blacklist',
+    'core',
     'rest_auth',
     'django.contrib.sites',
     'allauth',
@@ -61,7 +58,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'analytics',
     'category',
-    'core',
     'user.apps.AccountConfig',
     'product',
     'corsheaders',
@@ -77,7 +73,9 @@ INSTALLED_APPS = [
     'cart',
     'notification',
     'django_cleanup',
-    'storages'
+    'storages',
+    'inventory',
+    'buying'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -86,8 +84,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email',
         ],
-        'PROVIDER_KEY': data['social_auth_google_key'],
-        'PROVIDER_SECRET_KEY': data['social_auth_google_secret'],
+        'PROVIDER_KEY': env('SOCIAL_AUTH_GOOGLE_KEY'),
+        'PROVIDER_SECRET_KEY': env('SOCIAL_AUTH_GOOGLE_SECRET'),
         'AUTH_PARAMS': {
             'access_type': 'online',
         }
@@ -154,7 +152,6 @@ CELERY_TIMEZONE = 'Asia/tokyo'
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesBackend',
 ]
-
 # ロックされるまでのログイン回数
 AXES_FAILURE_LIIMT = 5
 #ログイン解除にかかるまでの時間を指定

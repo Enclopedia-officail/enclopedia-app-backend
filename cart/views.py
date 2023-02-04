@@ -9,9 +9,6 @@ from closet.models import Cloth
 
 # Create your views here.
 
-
-# cartを作成してを渡す
-
 class CartCreateView(generics.CreateAPIView):
     queryset = Cart.objects.select_related('user').all()
     serializer_class = CartSerializer
@@ -82,7 +79,7 @@ class AddCartItem(generics.CreateAPIView):
                 cartitems = CartItem.objects.select_related(
                     'product', 'cart').filter(cart=request.data['cart'])
                 serializer = self.serializer_class(
-                    cartitems, many=True)
+                    cartitems, many=True, context={"request":request})
                 return Response(serializer.data)
             else:
                 if data['quantite']:
@@ -99,7 +96,7 @@ class AddCartItem(generics.CreateAPIView):
                 cartitems = CartItem.objects.select_related(
                     'product', 'cart').filter(cart=request.data['cart'])
                 serializer = self.serializer_class(
-                    cartitems, many=True)
+                    cartitems, many=True, context={"request":request})
                 return Response(serializer.data)
 
         # product商品が追加されておらず新規作成をしなければならない状態
@@ -117,7 +114,7 @@ class AddCartItem(generics.CreateAPIView):
             cartitems = CartItem.objects.select_related(
                 'cart', 'product').filter(cart=request.data['cart'])
             serializer = self.serializer_class(
-                cartitems, many=True)
+                cartitems, many=True, context={"request":request})
         return Response(serializer.data)
 
 # basicプランの場合はcartviewはこちらを使用する。
@@ -153,19 +150,15 @@ class CartItemAddBasicView(APIView):
             # cart item内に重複があった場合にはvariatioとvariationなしのアイテムの個数を調整する必要がある
             items = CartItem.objects.select_related('product', 'cart').filter(
                 cart_id=cart, product_id=product)
-            print(len(items))
             if items.exists():
-                print(5)
                 is_exist_product_variations_list = []
                 id = []
                 # variationの重複を確認
-                print('point5')
                 for item in items:
                     exist_variations = item.variation.all()
                     is_exist_product_variations_list.append(
                         list(exist_variations))
                     id.append(item.id)
-                print('point6')
                 if product_variation in is_exist_product_variations_list or not is_exist_product_variations_list:
                     index = is_exist_product_variations_list.index(
                         product_variation)
@@ -182,7 +175,6 @@ class CartItemAddBasicView(APIView):
                     return Response(message, status=status.HTTP_200_OK)
                 # 新しくcartitemを作成する
                 else:
-                    print('point8')
                     CartItem.objects.select_related('product', 'cart').create(
                         product_id=product, cart_id=cart,  quantite=quantity
                     )
@@ -322,7 +314,7 @@ class carItemBasicEdit(generics.UpdateAPIView):
                     raise
                 update_item[0].save()
                 serializer = self.serializer_class(
-                    cart_items, many=True)
+                    cart_items, many=True, context={"request": request})
                 return Response(serializer.data)
             else:
                 raise
@@ -356,7 +348,7 @@ class carItemPremiumEdit(generics.UpdateAPIView):
                     raise
                 update_item[0].save()
                 serializer = self.serializer_class(
-                    cart_items, many=True)
+                    cart_items, many=True, context={"request":request})
                 return Response(serializer.data)
             else:
                 raise
@@ -376,7 +368,7 @@ class CartItemEdit(generics.RetrieveUpdateDestroyAPIView):
         cart_item = get_list_or_404(
             self.queryset, cart_id=request.GET['cart'])
         serializer = self.serializer_class(
-            cart_item, many=True)
+            cart_item, many=True, context={"request":request})
         return Response(serializer.data)
     # cartアイテムの数の変更or削除を実行するためのview
 
@@ -399,7 +391,7 @@ class CartItemEdit(generics.RetrieveUpdateDestroyAPIView):
         cart_item = get_list_or_404(
             self.queryset, cart_id=request.GET['cart'])
         serializer = self.serializer_class(
-            cart_item, many=True)
+            cart_item, many=True, context={"request":request})
         return Response(serializer.data)
 
 #closet内商品をまとめて予約する
@@ -416,7 +408,6 @@ class AddClosetItemView(APIView):
 
             cloth_list = []
             for cloth in clothes:
-                print('create')
                 cloth_list.append(CartItem(product=cloth.product, quantite=1, cart_id=cart_id))
             CartItem.objects.bulk_create(cloth_list)
 

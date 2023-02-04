@@ -1,4 +1,3 @@
-from gettext import install
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -79,12 +78,13 @@ class AccountSerializer(serializers.ModelSerializer):
 class AccountEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ('first_name', 'last_name', 'username', 'email')
+        fields = ('first_name', 'last_name', 'username', 'email', 'phone_number')
 
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.username = validated_data.get('username', instance.username)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.save(update_fields=["first_name"])
         return instance
 
@@ -152,7 +152,7 @@ class EmailSubscribeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmailSubscribe
-        fields = ['is_active']
+        fields = ['is_active', 'recipient_id']
 
 from .models import RandomNumber, AuthPhoneNumber
 class RandomNumberSerializer(serializers.ModelSerializer):

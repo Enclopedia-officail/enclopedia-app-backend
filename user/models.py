@@ -1,17 +1,17 @@
-from xmlrpc.client import boolean
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
 
 def upload_img(instance, filename):
 
     ext = filename.split('.')[-1]
-    if str(ext) == 'jpg' or str(ext) == 'png':
+    if str(ext) == 'webp':
         return 'profile/' + str(instance.user.id) + '.' + str(ext)
     else:
-        return 'profile/' + str(instance.user.id) + '.jpg'
+        return 'profile/' + str(instance.user.id) + '.webp'
 
 
 class AccountManager(BaseUserManager):
@@ -102,14 +102,13 @@ class Adress(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.OneToOneField(
         Account, on_delete=models.CASCADE, default=None, null=True)
-    country = models.CharField(max_length=255, default='Japan')
-    prefecture = models.CharField(max_length=255, default=None, null=True)
+    country = models.CharField(max_length=250, default='Japan')
+    prefecture = models.CharField(max_length=250, default=None, null=True)
     region = models.CharField(max_length=250, default=None, null=True)
-    address = models.CharField(max_length=50, default=None, null=True)
+    address = models.CharField(max_length=250, default=None, null=True)
     building_name = models.CharField(
-        max_length=200, default=None, blank=True, null=True)
+        max_length=250, default=None, blank=True, null=True)
     postalcode = models.CharField(max_length=50, default=None, null=True)
-    phoneNumberRegex = RegexValidator(regex = r"^\d{8,16}$")
 
     def __str__(self):
         return str(self.user)
@@ -141,13 +140,25 @@ class Profile(models.Model):
 
 class EmailSubscribe(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
+    recipient_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         if self.is_active:
             return self.user.username + '(購読中)'
         else:
             return self.user.username
+
+class Credibility(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    review = models.DecimalField(
+        max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(10.0)]
+    )
+
+    def __str__(self):
+        return str(self.review)
 
 class RandomNumber(models.Model):
     number = models.CharField(max_length=4, unique=True)

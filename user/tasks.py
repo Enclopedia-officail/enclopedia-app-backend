@@ -2,6 +2,7 @@ from django.conf import settings
 from celery import shared_task
 from django.core.mail import EmailMessage
 from notification.models import Notification
+from .models import EmailSubscribe
 import environ
 import json
 import requests
@@ -9,8 +10,25 @@ import requests
 import logging
 logger = logging.getLogger(__name__)
 
-env = environ.Env()
+env = environ.Env() 
 
+@shared_task
+def create_sendgrid_contact(instance):
+    try:
+        secret = settings.SENDGRID_API_KEY
+        header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
+        url = "https://api.sendgrid.com/v3/contactdb/recipients"
+        data = [
+                    {
+                        "email": instance.email,
+                    }
+                ]
+        response = requests.post(url, headers=header, data=json.dumps(data))
+        email_subscribe = EmailSubscribe.objects.get(user=instance)
+        email_subscribe.recipient_id = response.json()["persisted_recipients"][0]
+        email_subscribe.save()
+    except:
+        logger.error('sendgrid email送信リスト登録 user:{} 登録失敗'.format(instance.id))
 @shared_task
 def create_sendgrid_suppressions(instance):
     try:
@@ -25,7 +43,6 @@ def create_sendgrid_suppressions(instance):
         requests.post(url, headers=header, data=json.dumps(data))
     except:
         logger.error('sendgrid email送信リスト登録 user:{} 登録失敗'.format(instance.id))
-        pass
 
 #今回はuserのidをurlに付与してfrontendに渡すがここをtokenに置き換えを行う。
 @shared_task
@@ -103,7 +120,7 @@ def password_reset(instance, reset_password_token):
     msg.dynamic_template_data = {
         "first_name":reset_password_token.user.first_name,
         "last_name":reset_password_token.user.last_name,
-        "Weblink":'{domain}/{url}?token={token}'.format(domain=env("FRONTEND_URL"),url='/password_reset/password/confirm', token=reset_password_token.key)
+        "Weblink":'{domain}/{url}?token={token}'.format(domain=env("FRONTEND_URL"),url='password_reset/password/confirm', token=reset_password_token.key)
     }
     msg.send(fail_silently=False)
 
@@ -115,10 +132,8 @@ def authentication_phone_number(instance):
         from_email="operation@enclopediai-info.com",
         to=[instance.user.email]
     )
-    print('send')
     msg.template_id = "d-bcb56a6c49414a70b98fc573042dbdef"
     msg.dynamic_template_data = {
         "authentication_number": instance.random_number.number
     }
-    print('finish')
     msg.send(fail_silently=False)

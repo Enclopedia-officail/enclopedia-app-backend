@@ -19,7 +19,7 @@ class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
         fields = ['id', 'product', 'size', 'length', 'shoulder_width', 'chest',
-                  'waist', 'hip', 'inseam', 'sleeve_length']
+                  'waist', 'hip', 'rise', 'inseam', 'hem_width', 'sleeve_length']
         lookup_filed = 'product'
 
 
