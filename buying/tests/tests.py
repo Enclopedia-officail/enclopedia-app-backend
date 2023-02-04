@@ -3,12 +3,10 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.http import JsonResponse
 from product.models import Product
 from user.models import Adress
 from reservation.models import Reservation, ReservationItem
 from .. import models
-from .. import serializers
 from unittest.mock import patch, MagicMock
 
 #api url
@@ -203,6 +201,7 @@ class BuyingPaymentSuccessTest(TestCase):
         }
         res = self.client.post(BUYING_URL, data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['message'], '商品の購入が完了しました')
 
 class BuyingPaymentFailedTest(TestCase):
 
@@ -240,3 +239,4 @@ class BuyingPaymentFailedTest(TestCase):
         }
         res = self.client.post(BUYING_URL, data)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.data['message'], '支払いに失敗しました。')
