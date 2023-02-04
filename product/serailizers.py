@@ -73,7 +73,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'product_name', 'description',
                   'rating', 'review_count', 'stock', 'img', 'is_available',  'is_subscription',
-                  'brand', 'tag', 'size', 'price', 'gender', 'number_of_like']
+                  'brand', 'tag', 'size', 'price', 'buying_price', 'gender', 'number_of_like']
     
     def get_number_of_like(self, obj):
         favorites = Favorite.objects.filter(product=obj)

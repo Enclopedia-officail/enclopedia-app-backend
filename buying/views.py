@@ -33,17 +33,17 @@ class BuyingReservationItemView(APIView):
         user = request.user
         stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
         response = self.payment(data, stripe_customer)
-        instance = get_object_or_404(Order.objects.select_related('order_account', 'order_address', 'order_payment'),id = data['order_id'])
-        if response.data['status'] == 'succeded':
+        instance = get_object_or_404(Order.objects.select_related('user', 'payment'),id = data['order_id'])
+        if response['status'] == 'succeeded':
             #支払いが成功した場合
             instance.status = 'Completed'
-            instance.order_id = response.id
+            instance.order_id = data['order_id']
             instance.save(update_fields=['status', 'updated_at'])
             message = {
                 'message': '商品の購入が完了しました'
             }
             return Response(message, status=status.HTTP_200_OK)
-        elif response.data['status'] == 'requires_payment_method':
+        elif response['status'] == 'requires_payment_method':
             #支払いが失敗した場合の処理
             instance.status = 'Cancelled'
             instance.save(update_fields=['status', 'updated_at'])
@@ -51,7 +51,7 @@ class BuyingReservationItemView(APIView):
             return Response(error, status=status.HTTP_404_NOT_FOUND)
 
 class OrderItemListView(generics.ListAPIView):
-    queryset = OrderItem.objects.select_related('order_item_account', 'order_item').all()
+    queryset = OrderItem.objects.select_related('user', 'order', 'reservation_item').all()
     serializer_class = OrderItemSerializer
 
     def get(self, request):
@@ -60,13 +60,13 @@ class OrderItemListView(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrderItemCreateView(generics.CreateAPIView):
-    queryset = OrderItem.objects.select_related('order_item_account', 'order_payment', 'order_item').all()
+    queryset = OrderItem.objects.select_related('user', 'order', 'reservation_item').all()
     serializer_class = OrderItemSerializer
 
     def post(self, request, *args, **kwargs):
         user = request.user
         data = request.data
-        instance = OrderItem.objects.select_related('order_item_account', 'order_item').create(
+        instance = OrderItem.objects.select_related('user', 'order', 'reservation_item').create(
             user = user,
             order__id = data['order_id'],
             reservation_item__id = data['reservation_item_id'],
