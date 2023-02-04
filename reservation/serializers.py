@@ -12,7 +12,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ['id', 'reserved_start_date', 'reserved_end_date', 'is_reserved',
-                  'status', 'plan', 'total_price', 'shipping_price', 'shipping_number', 'return_shipping_number']
+                  'status', 'plan', 'total_price', 'shipping_price', 'shipping_number', 'return_shipping_number','return_date']
 
 #shipping情報とstatusを入れ替える
 class ReservationShippingNumberSerializer(serializers.ModelSerializer):

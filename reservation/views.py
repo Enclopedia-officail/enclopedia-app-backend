@@ -2,7 +2,7 @@ from product.models import Product
 from .models import Reservation, ReservationItem
 from rest_framework.views import APIView
 from .serializers import ReservationSerializer, ReservationItemSerializer, ResrevationListSerializer, ReservationShippingNumberSerializer, ReservationReturnShippingNumberSerializer
-from .serializers import  ReservationItemUserSerializer
+from .serializers import ReservationItemUserSerializer
 from rest_framework import generics
 from rest_framework import pagination
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from cart.models import CartItem, Cart
 from subscription.models import StripeAccount
+from rest_framework.permissions import AllowAny
 
 import datetime
 import calendar
@@ -47,7 +48,7 @@ class ReservationListItemView(generics.ListAPIView):
     queryset = Reservation.objects.select_related(
         'user', 'adress'
     ).order_by('-reserved_start_date').all().prefetch_related('reservationitem_set')
-    
+
     def get(self, request):
         user = request.user
         stripe_account = get_object_or_404(StripeAccount, user_id=user)
@@ -61,7 +62,7 @@ class ReservationListItemView(generics.ListAPIView):
         reservations = get_list_or_404(self.queryset, user=user, status__in = status_list, reserved_start_date__range=[contract_date, today])
         serializer = self.serializer_class(reservations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 class ReservationRentalListView(generics.ListAPIView):
     """reservation history about rental plan"""
     serializer_class = ResrevationListSerializer
@@ -111,7 +112,7 @@ class ReservationListView(generics.ListAPIView):
         contarct_date = None
         status_list = [1, 2, 3, 4, 5]
         if stripe_account.update_date:
-            contarct_date  = stripe_account.update_date
+            contarct_date = stripe_account.update_date
         else:
             contarct_date = stripe_account.start_date
         today = datetime.datetime.now()
@@ -148,7 +149,7 @@ class ReservationItemUserGet(generics.ListAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
+
 class ReservationCreateView(APIView):
     def post(self, request):
         data = request.data
@@ -171,7 +172,7 @@ class ReservationCreateView(APIView):
                 plan=plan,
                 reserved_end_date=reserved_end_date,
             )
-           
+
             try:
                 if len(reservation) > 4:
                     raise
@@ -181,7 +182,7 @@ class ReservationCreateView(APIView):
                     else:
                         cartitems = CartItem.objects.filter(cart_id=cart)
                         with transaction.atomic():
-                    
+
                             # productはlistで送られてくる
                             for cartitem in cartitems:
                                 product = get_object_or_404(
@@ -213,13 +214,13 @@ class ReservationCreateView(APIView):
                             data = {
                                 'title': '予約が完了しました',
                                 'message': '予約が完了しました,商品お届けまで3日ほどお時間をいただいております（天候等の影響により到着が遅れる場合がございます、ご了承ください.商品発送後に通知をいたします、到着まで今しばらくお待ちください'
-                                }
+                            }
                             return Response(data, status=status.HTTP_200_OK)
                 else:
                     cartitems = CartItem.objects.filter(cart_id=cart)
                     # 処理に失敗すれば元に戻るようにする
                     with transaction.atomic():
-                 
+
                         # productはlistで送られてくる
                         for cartitem in cartitems:
                             product = get_object_or_404(
@@ -229,11 +230,11 @@ class ReservationCreateView(APIView):
                                 product.save()
 
                             else:
-                                    data = {
-                                        'title': '在庫がありません',
-                                        'message': '現在オーダーした商品の{}の在庫がない状態です、商品詳細ページで商品の在庫数を確認してください。'.format(cartitem.product.product_name)
-                                    }
-                                    return Response(data, status=status.HTTP_200_OK)
+                                data = {
+                                    'title': '在庫がありません',
+                                    'message': '現在オーダーした商品の{}の在庫がない状態です、商品詳細ページで商品の在庫数を確認してください。'.format(cartitem.product.product_name)
+                                }
+                                return Response(data, status=status.HTTP_200_OK)
                             reservation_item = ReservationItem.objects.create(
                                 reservation=create_reservation,
                                 product=cartitem.product,
@@ -266,14 +267,14 @@ class ReservationCreateView(APIView):
                     )
                     if cartitem.variation.exists():
                         reservation_item.variation.add(cartitem.variation)
-                    #
+
                 create_reservation.status = 2
                 create_reservation.save(update_fields=["status"])
                 Cart.objects.get(user=user).delete()
                 error = {
                     'title': '商品の予約に失敗しました',
                     'message': '商品の予約に失敗しました、現在予約中の商品があるか在庫がない場合がございます'
-                    }
+                }
                 return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
         elif subscription_user_info.is_active & (subscription_user_info.plan == plan == 'premium'):
@@ -293,7 +294,6 @@ class ReservationCreateView(APIView):
                         )
                         cartitems = CartItem.objects.filter(cart_id=cart)
 
-                    
                         # 処理に失敗すればdbを元に戻す
                         with transaction.atomic():
                             # productはlistになっている
@@ -328,7 +328,7 @@ class ReservationCreateView(APIView):
                                 }
                         return Response(data, status=status.HTTP_200_OK)
                 else:
-            
+
                     create_reaservation = Reservation.objects.create(
                         user=user,
                         adress_id=adress,
@@ -338,7 +338,6 @@ class ReservationCreateView(APIView):
                     )
                     cartitems = CartItem.objects.filter(cart_id=cart)
 
-                
                     # 処理に失敗すればdbを元に戻す
                     with transaction.atomic():
                         # productはlistになっている
@@ -385,7 +384,7 @@ class ReservationCreateView(APIView):
                             quantity=cartitem.quantite,
                         )
                         if cartitem.variation.exists():
-                                reservation_item.variation.add(cartitem.variation)
+                            reservation_item.variation.add(cartitem.variation)
                 error = {
                     'title': '商品の予約に失敗しました',
                     'message': '商品の予約に失敗しました、現在予約中の商品があるか在庫がない場合がございます'}
@@ -394,7 +393,7 @@ class ReservationCreateView(APIView):
             error = {
                 'title': '予約に失敗しました',
                 'message': 'サブスクリプションプランに登録して下さい'
-                }
+            }
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
     # 予約した商品を一日以内であればキャンセルできるようにする。
@@ -405,7 +404,6 @@ class ReservationCreateView(APIView):
         today = datetime.datetime.now()
 
         # 個々のアイテムごとにキャンセルができるようにする
-        #
         reservation = get_list_or_404(Reservation, user_id=user)[0]
         reservation_items = get_list_or_404(
             ReservationItem, user_id=user, reservation=reservation.id)
@@ -463,13 +461,40 @@ class ReturnProductConfirmView(generics.UpdateAPIView):
     serializer_class = ReservationSerializer
 
     def update(self, request, pk, *args, **kwargs):
-        try:
-            data = request.data
-            instance = get_object_or_404(Reservation, id=pk)
-            instance.status = data['status']
-            instance.save(update_fields=['status'])
-            serializer = self.serializer_class(instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        data = request.data
+        instance = get_object_or_404(Reservation, id=pk)
+        instance.status = data['status']
+        instance.save(update_fields=['status'])
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+#SHIPPINGの商品一覧を取得するAPI
+class ShippingReservationsListView(generics.ListAPIView):
+    permission_classes = (IsAdminUser,)
+    queryset = Reservation.objects.filter(status=4)
+    serializer_class = ReservationSerializer
+
+#返却が完了した時の処理
+class CompleteRetrunView(generics.UpdateAPIView):
+    permission_classes = (IsAdminUser,)
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+
+    def update(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(Reservation, id=pk)
+        instance.status = 5
+        instance.is_reserved = False
+        instance.return_date = datetime.datetime.now()
+        instance.save(update_fields=['status','is_reserved','return_date'])
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class GetReservationItemView(generics.RetrieveAPIView):
+    permission_classes = (AllowAny,)
+    queryset = ReservationItem.objects.select_related('product', 'reservation').all()
+    serializer_class = ReservationItemSerializer
+
+    def get(self, request, pk):
+        instance = get_object_or_404(ReservationItem, id=pk)
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
