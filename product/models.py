@@ -3,16 +3,29 @@ from django.db import models
 from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user.models import Account
+from PIL import Image
+import boto3
+import os
 import datetime
 import uuid
 
 def upload_img(instance, filename):
     today = datetime.datetime.now()
     ext = filename.split('.')[-1]
+
     if str(ext) == 'webp':
+        #s3に保存
         return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'image_gallary/' + str(today) + str(instance.id) + '.webp'
+        image = Image.open(instance.img)
+        image_filename = str(today) + str(instance.id) + '.webp'
+        path = os.path.join("media/image_gallary", image_filename)
+        image.save(image_filename, "WEBP")
+        #s3に保存
+        s3 = boto3.client('s3')
+        s3.upload_file(path, "enclopedia-media-bucket", path)
+        os.remove(path)
+        return path
 
 def upload_review_img(instance, filename):
 
@@ -21,7 +34,7 @@ def upload_review_img(instance, filename):
         return 'review/' + str(instance.id) + '.' + str(ext).lower()
     else:
         return 'review/' + str(instance.id) + '.webp'
-
+    
 def upload_thumbnail(instance, filename):
 
     ext = filename.split('.')[-1]
@@ -30,14 +43,19 @@ def upload_thumbnail(instance, filename):
     else:
         return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.webp'
 
-
-
 def upload_product(instance, filename):
     ext = filename.split('.')[-1]
+    image = Image.open(instance.img)
+    #webpをs3に保存することでWebサイトの改善を図る  
     if str(ext) == 'webp':
-         return 'product/' + str(instance.id) + '.' + str(ext).lower()
+        return 'product/' + str(instance.id) + '.' + str(ext).lower()
     else:
-         return 'product/' + str(instance.id) + '.webp'
+        path = os.path.join('media/product/'+str(instance.id)+'.webp')
+        image.save(path, 'WEBP')
+        s3 = boto3.client('s3')
+        s3.upload_file(path, "enclopedia-media-bucket", path)
+        os.remove(path)
+        return path
 
 # 配送料を決定するための
 shipping_size = [
