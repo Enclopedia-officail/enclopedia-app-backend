@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
 from PIL import Image
 import uuid
 import os
@@ -18,8 +19,8 @@ def upload_img(instance, filename):
         image = Image.open(instance.img)
         path = os.path.join('media/profile', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, 'WEBP')
-        s3 = boto3.client('s3')
+        image.save(local_path, format='webp')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return 'profile/' + image_filename

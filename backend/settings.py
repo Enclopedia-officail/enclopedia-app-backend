@@ -430,4 +430,4 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 PUBLIC_MEDIA_LOCATION = 'media'
 MEDIA_ROOT = 'https://%s/%s/' % ('media.enclopedia-official.com', PUBLIC_MEDIA_LOCATION)
 MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'backend.storage_backends.MediaStorage'

@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user.models import Account
+from django.conf import settings
 from PIL import Image
 import boto3
 import os
@@ -21,9 +22,9 @@ def upload_img(instance, filename):
         image_filename = str(today) + str(instance.id) + '.webp'
         path = os.path.join("media/image_gallary", image_filename)
         local_path = os.path.join("media", image_filename)
-        image.save(local_path, "WEBP")
+        image.save(local_path, format='webp')
         #s3に保存
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return "image_gallary/" + image_filename
@@ -38,8 +39,8 @@ def upload_review_img(instance, filename):
         image_filename = str(instance.id) + '.webp'
         path = os.path.join('media/review/', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, 'WEBP')
-        s3 = boto3.client('s3')
+        image.save(local_path, format='webp')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return 'review/' + image_filename
@@ -62,8 +63,8 @@ def upload_product(instance, filename):
         image_filename = str(instance.id)+'.webp'
         path = os.path.join('media/product', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, 'WEBP')
-        s3 = boto3.client('s3')
+        image.save(local_path, format='webp')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return 'product/' + image_filename

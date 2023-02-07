@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from PIL import Image
+from django.conf import settings
 import os
 import boto3
 
@@ -13,7 +14,7 @@ def upload_img(instance, filename):
         image_filename = str(instance.brand_name) + '.webp'
         path = os.path.join('media/brand_icon/', image_filename)
         local_path = os.path.join('media' + image_filename)
-        image.save(local_path, 'WEBP')
+        image.save(local_path, format='webp')
         s3 = boto3.client('s3')
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
@@ -29,7 +30,7 @@ def upload_type(instance, filename):
         image = Image.open(instance.image)
         path = os.path.join('media/type', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, "WEBP")
+        image.save(local_path, format='webp')
         s3 = boto3.client('s3')
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
@@ -44,7 +45,7 @@ def upload_category(instance, filename):
         image_filename = instance.category_name + '.webp'
         path = os.path.join('media/category/', image_filename)
         local_path = os.path.join('media/', image_filename)
-        image.save(local_path, 'WEBP')
+        image.save(local_path, format='webp')
         s3 = boto3.client('s3')
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
