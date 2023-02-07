@@ -18,11 +18,11 @@ def upload_img(instance, filename):
         #s3に保存
         return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
     else:
-        image = Image.open(instance.original)
+        image = Image.open(instance.original).convert('RGB')
         image_filename = str(today) + str(instance.id) + '.webp'
         path = os.path.join("media/image_gallary", image_filename)
         local_path = os.path.join("media", image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         #s3に保存
         s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
@@ -35,11 +35,11 @@ def upload_review_img(instance, filename):
     if str(ext) == 'webp':
         return 'review/' + str(instance.id) + '.' + str(ext).lower()
     else:
-        image = Image.open(instance.image)
+        image = Image.open(instance.image).convert('RGB')
         image_filename = str(instance.id) + '.webp'
         path = os.path.join('media/review/', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
@@ -55,15 +55,16 @@ def upload_thumbnail(instance, filename):
 
 def upload_product(instance, filename):
     ext = filename.split('.')[-1]
-    image = Image.open(instance.img)
+
     #webpをs3に保存することでWebサイトの改善を図る  
     if str(ext) == 'webp':
         return 'product/' + str(instance.id) + '.' + str(ext).lower()
     else:
+        image = Image.open(instance.img).convert('RGB')
         image_filename = str(instance.id)+'.webp'
         path = os.path.join('media/product', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)

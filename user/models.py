@@ -16,10 +16,10 @@ def upload_img(instance, filename):
         return 'profile/' + str(instance.user.id) + '.' + str(ext)
     else:
         image_filename = str(instance.user.id) + '.webp'
-        image = Image.open(instance.img)
+        image = Image.open(instance.img).convert('RGB')
         path = os.path.join('media/profile', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)

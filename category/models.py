@@ -10,11 +10,11 @@ def upload_img(instance, filename):
     if str(ext) == 'webp':
         return 'brand_icon/' + str(instance.brand_name) + '.' + str(ext).lower()
     else:
-        image = Image.open(instance.img)
+        image = Image.open(instance.img).convert('RGB')
         image_filename = str(instance.brand_name) + '.webp'
         path = os.path.join('media/brand_icon/', image_filename)
         local_path = os.path.join('media' + image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         s3 = boto3.client('s3')
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
@@ -27,10 +27,10 @@ def upload_type(instance, filename):
     if str(ext) == 'webp':
         return 'type/' + image_filename
     else:
-        image = Image.open(instance.image)
+        image = Image.open(instance.image).convert('RGB')
         path = os.path.join('media/type', image_filename)
         local_path = os.path.join('media', image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         s3 = boto3.client('s3')
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
@@ -41,11 +41,11 @@ def upload_category(instance, filename):
     if str(ext) == 'webp':
         return 'category/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
     else:
-        image = Image.open(instance.image)
+        image = Image.open(instance.image).convert('RGB')
         image_filename = instance.category_name + '.webp'
         path = os.path.join('media/category/', image_filename)
         local_path = os.path.join('media/', image_filename)
-        image.save(local_path, format='webp')
+        image.save(local_path, 'webp')
         s3 = boto3.client('s3')
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
