@@ -2,7 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
+from PIL import Image
 import uuid
+import os
+import boto3
 
 
 def upload_img(instance, filename):
@@ -11,7 +14,15 @@ def upload_img(instance, filename):
     if str(ext) == 'webp':
         return 'profile/' + str(instance.user.id) + '.' + str(ext)
     else:
-        return 'profile/' + str(instance.user.id) + '.webp'
+        image_filename = str(instance.user.id) + '.webp'
+        image = Image.open(instance.img)
+        path = os.path.join('media/profile', image_filename)
+        local_path = os.path.join('media', image_filename)
+        image.save(local_path, 'WEBP')
+        s3 = boto3.client('s3')
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return 'profile/' + image_filename
 
 
 class AccountManager(BaseUserManager):

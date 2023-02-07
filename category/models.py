@@ -1,27 +1,54 @@
 from django.db import models
 import uuid
+from PIL import Image
+import os
+import boto3
 
 def upload_img(instance, filename):
     ext = filename.split('.')[-1]
     if str(ext) == 'webp':
-        return 'brand_icon/' + str(instance.id) + '.' + str(ext).lower()
+        return 'brand_icon/' + str(instance.brand_name) + '.' + str(ext).lower()
     else:
-        return 'brand_icon/' + str(instance.id) + '.webp'
+        image = Image.open(instance.img)
+        image_filename = str(instance.brand_name) + '.webp'
+        path = os.path.join('media/brand_icon/', image_filename)
+        local_path = os.path.join('media' + image_filename)
+        image.save(local_path, 'WEBP')
+        s3 = boto3.client('s3')
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return 'brand_icon/' + image_filename
 
 
 def upload_type(instance, filename):
     ext = filename.split('.')[-1]
+    image_filename = str(instance.id) + '.webp'
     if str(ext) == 'webp':
-        return 'type/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
+        return 'type/' + image_filename
     else:
-        return 'type/' + str(instance.category_name) + str(instance.id) + '.webp'
+        image = Image.open(instance.image)
+        path = os.path.join('media/type', image_filename)
+        local_path = os.path.join('media', image_filename)
+        image.save(local_path, "WEBP")
+        s3 = boto3.client('s3')
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return 'type/' + image_filename 
 
 def upload_category(instance, filename):
     ext = filename.split('.')[-1]
     if str(ext) == 'webp':
         return 'category/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'category/' + str(instance.category_name) + str(instance.id) + '.webp'
+        image = Image.open(instance.image)
+        image_filename = instance.category_name + '.webp'
+        path = os.path.join('media/category/', image_filename)
+        local_path = os.path.join('media/', image_filename)
+        image.save(local_path, 'WEBP')
+        s3 = boto3.client('s3')
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return 'category/' + image_filename
 
 
 class Type(models.Model):

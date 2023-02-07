@@ -17,15 +17,16 @@ def upload_img(instance, filename):
         #s3に保存
         return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
     else:
-        image = Image.open(instance.img)
+        image = Image.open(instance.original)
         image_filename = str(today) + str(instance.id) + '.webp'
         path = os.path.join("media/image_gallary", image_filename)
-        image.save(image_filename, "WEBP")
+        local_path = os.path.join("media", image_filename)
+        image.save(local_path, "WEBP")
         #s3に保存
         s3 = boto3.client('s3')
-        s3.upload_file(path, "enclopedia-media-bucket", path)
-        os.remove(path)
-        return path
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return "image_gallary/" + image_filename
 
 def upload_review_img(instance, filename):
 
@@ -33,7 +34,15 @@ def upload_review_img(instance, filename):
     if str(ext) == 'webp':
         return 'review/' + str(instance.id) + '.' + str(ext).lower()
     else:
-        return 'review/' + str(instance.id) + '.webp'
+        image = Image.open(instance.image)
+        image_filename = str(instance.id) + '.webp'
+        path = os.path.join('media/review/', image_filename)
+        local_path = os.path.join('media', image_filename)
+        image.save(local_path, 'WEBP')
+        s3 = boto3.client('s3')
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return 'review/' + image_filename
     
 def upload_thumbnail(instance, filename):
 
@@ -50,12 +59,14 @@ def upload_product(instance, filename):
     if str(ext) == 'webp':
         return 'product/' + str(instance.id) + '.' + str(ext).lower()
     else:
-        path = os.path.join('media/product/'+str(instance.id)+'.webp')
-        image.save(path, 'WEBP')
+        image_filename = str(instance.id)+'.webp'
+        path = os.path.join('media/product', image_filename)
+        local_path = os.path.join('media', image_filename)
+        image.save(local_path, 'WEBP')
         s3 = boto3.client('s3')
-        s3.upload_file(path, "enclopedia-media-bucket", path)
-        os.remove(path)
-        return path
+        s3.upload_file(local_path, "enclopedia-media-bucket", path)
+        os.remove(local_path)
+        return 'product/' + image_filename
 
 # 配送料を決定するための
 shipping_size = [
