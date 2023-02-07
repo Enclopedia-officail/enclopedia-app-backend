@@ -43,11 +43,9 @@ class ShippingReservationsTest(TestCase):
     def test_shipping_list(self):
         # 取得したリストが全てSHIPPINGかテスト
         res = self.client.get(RESERVATION_LIST_URL)
-        print(res.data)
         statusNum = []
         for result in res.data['results']:
             statusNum.append(result['status'])
-        print(RESERVATION_LIST_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(statusNum.count(4) == len(statusNum), True)
 
