@@ -15,7 +15,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from cart.models import CartItem, Cart
 from subscription.models import StripeAccount
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 
 import datetime
 import calendar
@@ -490,11 +490,22 @@ class CompleteRetrunView(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GetReservationItemView(generics.RetrieveAPIView):
-    permission_classes = (AllowAny,)
     queryset = ReservationItem.objects.select_related('product', 'reservation').all()
     serializer_class = ReservationItemSerializer
 
     def get(self, request, pk):
-        instance = get_object_or_404(ReservationItem, id=pk)
+        instance = get_object_or_404(self.queryset, id=pk)
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UpdateReservationItemReviewView(generics.UpdateAPIView):
+    permission_classes = (IsAdminUser,)
+    queryset = ReservationItem.objects.select_related('product', 'reservation').all()
+    serializer_class = ReservationItemSerializer
+    
+    def update(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(self.queryset, id=pk)
+        instance.review = request.data['review']
+        instance.save(update_fields=['review'])
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
