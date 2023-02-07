@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from user.models import Account, Adress, Profile, EmailSubscribe, AuthPhoneNumber
+from user.models import Account, Adress, Profile, EmailSubscribe, AuthPhoneNumber, Credibility
 from subscription.models import StripeAccount
 from django_rest_passwordreset.signals import reset_password_token_created
 from .tasks import create_sendgrid_contact, send_register_confirmation_email, send_confirmation_email, password_reset
@@ -18,6 +18,7 @@ def create_account_profile(sender, instance, created, **kwargs):
     if created and instance.id:
         Profile.objects.create(user=instance)
         Adress.objects.create(user=instance)
+        Credibility.objects.create(user=instance)
         StripeAccount.objects.create(user_id=instance)
 
 #accout作成時にsendgrid mailingリストにメールを登録し、EmailSubscribetableを作成する

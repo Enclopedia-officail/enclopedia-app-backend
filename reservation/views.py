@@ -489,8 +489,7 @@ class CompleteRetrunView(generics.UpdateAPIView):
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class GetReservationItemView(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+class GetReservationItemView(generics.RetrieveAPIView):
     queryset = ReservationItem.objects.select_related('product', 'reservation').all()
     serializer_class = ReservationItemSerializer
 
@@ -499,6 +498,11 @@ class GetReservationItemView(generics.RetrieveUpdateAPIView):
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class UpdateReservationItemReviewView(generics.UpdateAPIView):
+    permission_classes = (IsAdminUser,)
+    queryset = ReservationItem.objects.select_related('product', 'reservation').all()
+    serializer_class = ReservationItemSerializer
+    
     def update(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(self.queryset, id=pk)
         instance.review = request.data['review']

@@ -6,6 +6,7 @@ from user.models import Credibility
 from .serializers import ReservationItemSerializer
 from django.conf import settings
 from django.core.mail import EmailMessage
+from decimal import Decimal
 
 import logging
 logger = logging.getLogger(__name__)
@@ -188,9 +189,9 @@ def return_favorite_product_notification(instance):
 
 @shared_task
 def return_product(instance):
-    number = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2,-0.1, 1]
+    number = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2,-0.1, 0.1]
     user = instance.reservation.user
-    review = instance.review
+    review = int(instance.review)
     credibility = Credibility.objects.select_related('user').get(user=user)
-    credibility.review += number[review]
+    credibility.review += Decimal(number[review])
     credibility.save()
