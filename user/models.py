@@ -2,28 +2,13 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.conf import settings
-from PIL import Image
 import uuid
-import os
 import time
-import boto3
 
 
 def upload_img(instance, filename):
-    ext = filename.split('.')[-1]
     image_filename = str(time.time()) + str(instance.user.id) + '.webp'
-    if str(ext) == 'webp':
-        return 'profile/' + image_filename
-    else:
-        image = Image.open(instance.img).convert('RGB')
-        path = os.path.join('media/profile', image_filename)
-        local_path = os.path.join('media', image_filename)
-        image.save(local_path, 'webp')
-        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
-        s3.upload_file(local_path, "enclopedia-media-bucket", path)
-        os.remove(local_path)
-        return 'profile/' + image_filename
+    return 'profile/' + image_filename
 
 
 class AccountManager(BaseUserManager):
@@ -148,7 +133,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user.username)
-
 
 class EmailSubscribe(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
