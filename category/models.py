@@ -4,18 +4,20 @@ from PIL import Image
 from django.conf import settings
 import os
 import boto3
+import time
 
 def upload_img(instance, filename):
     ext = filename.split('.')[-1]
+    now = time.time()
     if str(ext) == 'webp':
-        return 'brand_icon/' + str(instance.brand_name) + '.' + str(ext).lower()
+        return 'brand_icon/' + str(now) + str(instance.brand_name) + '.' + str(ext).lower()
     else:
         image = Image.open(instance.img).convert('RGB')
-        image_filename = str(instance.brand_name) + '.webp'
+        image_filename = str(now) + str(instance.brand_name) + '.webp'
         path = os.path.join('media/brand_icon/', image_filename)
         local_path = os.path.join('media' + image_filename)
         image.save(local_path, 'webp')
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return 'brand_icon/' + image_filename
@@ -23,7 +25,8 @@ def upload_img(instance, filename):
 
 def upload_type(instance, filename):
     ext = filename.split('.')[-1]
-    image_filename = str(instance.id) + '.webp'
+    now = time.time()
+    image_filename = str(now) + str(instance.id) + '.webp'
     if str(ext) == 'webp':
         return 'type/' + image_filename
     else:
@@ -31,22 +34,23 @@ def upload_type(instance, filename):
         path = os.path.join('media/type', image_filename)
         local_path = os.path.join('media', image_filename)
         image.save(local_path, 'webp')
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return 'type/' + image_filename 
 
 def upload_category(instance, filename):
     ext = filename.split('.')[-1]
+    now = time.time()
     if str(ext) == 'webp':
-        return 'category/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
+        return 'category/' + str(now) + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
     else:
         image = Image.open(instance.image).convert('RGB')
-        image_filename = instance.category_name + '.webp'
+        image_filename = str(now) + instance.category_name + '.webp'
         path = os.path.join('media/category/', image_filename)
         local_path = os.path.join('media/', image_filename)
         image.save(local_path, 'webp')
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_ID)
         s3.upload_file(local_path, "enclopedia-media-bucket", path)
         os.remove(local_path)
         return 'category/' + image_filename

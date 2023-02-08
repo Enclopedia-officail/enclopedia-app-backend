@@ -6,20 +6,20 @@ from user.models import Account
 from django.conf import settings
 from PIL import Image
 import boto3
+import time
 import os
-import datetime
 import uuid
 
 def upload_img(instance, filename):
-    today = datetime.datetime.now()
+    now = time.time()
     ext = filename.split('.')[-1]
 
     if str(ext) == 'webp':
         #s3に保存
-        return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
+        return 'image_gallary/' + str(now) + str(instance.id) + '.' + str(ext).lower()
     else:
         image = Image.open(instance.original).convert('RGB')
-        image_filename = str(today) + str(instance.id) + '.webp'
+        image_filename = str(now) + str(instance.id) + '.webp'
         path = os.path.join("media/image_gallary", image_filename)
         local_path = os.path.join("media", image_filename)
         image.save(local_path, 'webp')
@@ -30,13 +30,13 @@ def upload_img(instance, filename):
         return "image_gallary/" + image_filename
 
 def upload_review_img(instance, filename):
-
+    now = time.time()
     ext = filename.split('.')[-1]
     if str(ext) == 'webp':
-        return 'review/' + str(instance.id) + '.' + str(ext).lower()
+        return 'review/' + str(now) + str(instance.id) + '.' + str(ext).lower()
     else:
         image = Image.open(instance.image).convert('RGB')
-        image_filename = str(instance.id) + '.webp'
+        image_filename = str(now) + str(instance.id) + '.webp'
         path = os.path.join('media/review/', image_filename)
         local_path = os.path.join('media', image_filename)
         image.save(local_path, 'webp')
@@ -54,14 +54,15 @@ def upload_thumbnail(instance, filename):
         return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.webp'
 
 def upload_product(instance, filename):
+    now = time.time.now()
     ext = filename.split('.')[-1]
 
     #webpをs3に保存することでWebサイトの改善を図る  
     if str(ext) == 'webp':
-        return 'product/' + str(instance.id) + '.' + str(ext).lower()
+        return 'product/' +  str(now) + str(instance.id) + '.' + str(ext).lower()
     else:
         image = Image.open(instance.img).convert('RGB')
-        image_filename = str(instance.id)+'.webp'
+        image_filename = str(now) + str(instance.id)+'.webp'
         path = os.path.join('media/product', image_filename)
         local_path = os.path.join('media', image_filename)
         image.save(local_path, 'webp')

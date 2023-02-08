@@ -6,16 +6,16 @@ from django.conf import settings
 from PIL import Image
 import uuid
 import os
+import time
 import boto3
 
 
 def upload_img(instance, filename):
-
     ext = filename.split('.')[-1]
+    image_filename = str(time.time()) + str(instance.user.id) + '.webp'
     if str(ext) == 'webp':
-        return 'profile/' + str(instance.user.id) + '.' + str(ext)
+        return 'profile/' + image_filename
     else:
-        image_filename = str(instance.user.id) + '.webp'
         image = Image.open(instance.img).convert('RGB')
         path = os.path.join('media/profile', image_filename)
         local_path = os.path.join('media', image_filename)
