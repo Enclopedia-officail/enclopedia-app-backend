@@ -10,4 +10,6 @@ urlpatterns = [
     path('list/', views.NotificationListView.as_view(), name='notifiaction'),
     path('news/<int:pk>/', views.NewsView.as_view()),
     path('<int:pk>/', views.NotificationRetreiveView.as_view()),
+    path('todo/list/', views.TodoListView.as_view(), name='todo_list'),
+    path('todo/<int:pk>', views.TodoCompletedView.as_view())
 ]

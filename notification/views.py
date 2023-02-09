@@ -90,5 +90,12 @@ class TodoListView(generics.ListAPIView):
         serializer = self.serializer_class(todo, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
+class TodoCompletedView(generics.UpdateAPIView):
+    serializer_class = TodoSerializer
+    queryset = Todo.objects.order_by('-created_at').select_related('user').all()
+    def put(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(self.queryset, id=pk)
+        instance.todo = request.data['todo']
+        instance.save()
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)

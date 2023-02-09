@@ -4,7 +4,6 @@ from account_history.models import Favorite
 from .models import ReservationItem
 from user.models import Credibility
 from .serializers import ReservationItemSerializer
-from django.conf import settings
 from django.core.mail import EmailMessage
 from decimal import Decimal
 
