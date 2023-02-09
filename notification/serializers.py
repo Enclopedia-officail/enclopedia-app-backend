@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
-from .models import Read, News, Notification
+from .models import Read, News, Notification, Todo
 
 #ポリモーフィック獲得時にはtitleとidのみ必要
 class NewsSerializer(serializers.ModelSerializer):
@@ -43,10 +43,8 @@ class ListReadSerialzier(serializers.ModelSerializer):
         model = Read
         fields = ['id', 'read', 'content_type', 'object_id']
 
-
-
-
-
-
-#通知を作成した際には自動的にuser全員のReadテーブルの作成を非同期で行わなかればならない
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ['id', 'title', 'created_at', 'url', 'todo']
 

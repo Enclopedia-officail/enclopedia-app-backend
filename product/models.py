@@ -3,25 +3,20 @@ from django.db import models
 from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user.models import Account
-import datetime
+import time
 import uuid
 
+
 def upload_img(instance, filename):
-    today = datetime.datetime.now()
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-        return 'image_gallary/' + str(today) + str(instance.id) + '.' + str(ext).lower()
-    else:
-        return 'image_gallary/' + str(today) + str(instance.id) + '.webp'
+    now = time.time()
+    image_filename = str(now) + str(instance.id) + '.webp'
+    return "image_gallary/" + image_filename
 
 def upload_review_img(instance, filename):
-
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-        return 'review/' + str(instance.id) + '.' + str(ext).lower()
-    else:
-        return 'review/' + str(instance.id) + '.webp'
-
+    now = time.time()
+    image_filename = str(now) + str(instance.id) + '.webp'
+    return 'review/' + image_filename
+    
 def upload_thumbnail(instance, filename):
 
     ext = filename.split('.')[-1]
@@ -30,14 +25,10 @@ def upload_thumbnail(instance, filename):
     else:
         return 'image_gallary/thumbnail/' + str(instance.product.id + instance.id) + '.webp'
 
-
-
 def upload_product(instance, filename):
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-         return 'product/' + str(instance.id) + '.' + str(ext).lower()
-    else:
-         return 'product/' + str(instance.id) + '.webp'
+    now = time.time()
+    image_filename = str(now) + str(instance.id)+'.webp'
+    return 'product/' + image_filename
 
 # 配送料を決定するための
 shipping_size = [
@@ -254,5 +245,5 @@ class ImageGallary(models.Model):
         return str(self.product)
 
     class Meta:
-        verbose_name = 'image gallary'
-        verbose_name_plural = 'image gallary'
+        verbose_name = 'イメージギャラリー'
+        verbose_name_plural = 'イメージギャラリーズ'

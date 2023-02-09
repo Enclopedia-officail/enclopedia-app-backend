@@ -1,28 +1,22 @@
 from django.db import models
 import uuid
+from django.conf import settings
+import time
 
 def upload_img(instance, filename):
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-        return 'brand_icon/' + str(instance.id) + '.' + str(ext).lower()
-    else:
-        return 'brand_icon/' + str(instance.id) + '.webp'
-
+    now = time.time()
+    image_filename = str(now) + str(instance.brand_name) + '.webp'
+    return 'brand_icon/' + image_filename
 
 def upload_type(instance, filename):
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-        return 'type/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
-    else:
-        return 'type/' + str(instance.category_name) + str(instance.id) + '.webp'
-
+    now = time.time()
+    image_filename = str(now) + str(instance.id) + '.webp'
+    return 'type/' + image_filename
+  
 def upload_category(instance, filename):
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-        return 'category/' + str(instance.category_name) + str(instance.id) + '.' + str(ext).lower()
-    else:
-        return 'category/' + str(instance.category_name) + str(instance.id) + '.webp'
-
+    now = time.time()
+    image_filename = str(now) + instance.category_name + '.webp'
+    return 'category/' + image_filename
 
 class Type(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)

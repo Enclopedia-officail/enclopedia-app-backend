@@ -3,15 +3,12 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
+import time
 
 
 def upload_img(instance, filename):
-
-    ext = filename.split('.')[-1]
-    if str(ext) == 'webp':
-        return 'profile/' + str(instance.user.id) + '.' + str(ext)
-    else:
-        return 'profile/' + str(instance.user.id) + '.webp'
+    image_filename = str(time.time()) + str(instance.user.id) + '.webp'
+    return 'profile/' + image_filename
 
 
 class AccountManager(BaseUserManager):
@@ -136,7 +133,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user.username)
-
 
 class EmailSubscribe(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
