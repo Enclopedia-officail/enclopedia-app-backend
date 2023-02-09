@@ -9,7 +9,7 @@ from product.models import Product
 class ReservationItemTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user(
+        self.user = get_user_model().objects.create_superuser(
             first_name = 'test',
             last_name = 'test',
             username = 'test',
@@ -39,3 +39,10 @@ class ReservationItemTest(TestCase):
         # ReservationItemをurlパラメータから取得するテスト
         res = self.client.get('/api/reservation/item/{}'.format(self.reservationItem.id))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_patch_reservationItem_review(self):
+        # ReservationItemのreviewを更新するテスト
+        data = {'review': 5}
+        res = self.client.patch('/api/reservation/item/{}/review'.format(self.reservationItem.id),data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['review'], 5)

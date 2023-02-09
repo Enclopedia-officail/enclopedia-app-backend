@@ -153,7 +153,7 @@ class Credibility(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
     review = models.DecimalField(
         max_digits=2, decimal_places=1, blank=True, null=True, default=0.0,
-        validators=[MinValueValidator(0),
+        validators=[MinValueValidator(-3.0),
                     MaxValueValidator(10.0)]
     )
 
