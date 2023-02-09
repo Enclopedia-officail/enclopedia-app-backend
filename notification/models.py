@@ -38,7 +38,15 @@ class Notification(Activitie):
     def __str__(self):
         return self.title
 
-#userが通知を確認したかどうか判断するようにする
-#
+#push通知の実装が必要になってくる
+class Todo(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    #画像の保存は必要なく
+    thumbnail = models.URLField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    url = models.URLField()
+    todo = models.BooleanField(default=False)
 
-    
+    def __str__(self):
+        return self.title

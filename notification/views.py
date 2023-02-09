@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework import generics
 from rest_framework import status
-from .models import News, Notification, Read
-from .serializers import ListReadSerialzier, NewsSerializer, NewsListSerialzier, NotificationListSerializer,NotificationSerializer
+from .models import News, Notification, Read, Todo
+from .serializers import ListReadSerialzier, NewsSerializer, NewsListSerialzier, NotificationListSerializer, NotificationSerializer, TodoSerializer
 
 #administrator側のみで作成
 class NewsCreateView(generics.CreateAPIView):
@@ -71,15 +71,23 @@ class NewsListView(generics.ListAPIView):
 
 #userへ穂通知を取得する
 class NotificationListView(generics.ListAPIView):
-   
     serializer_class =NotificationListSerializer
     queryset = Notification.objects.order_by('-created_at').defer('body', 'url').all()
-
 
     def get(self, request):
         user = request.user
         notifications = get_list_or_404(self.queryset, user=user)
         serializer = self.serializer_class(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+#完了していないやることリストを一覧で取得する
+class TodoListView(generics.ListAPIView):
+    serializer_class = TodoSerializer
+    queryset = Todo.objects.order_by('-created_at').select_related('user').all()
+    def get(self, request):
+        user = request.user
+        todo = get_list_or_404(self.queryset, user=user, todo=False)
+        serializer = self.serializer_class(todo, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
