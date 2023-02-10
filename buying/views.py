@@ -10,6 +10,9 @@ from subscription.models import StripeAccount
 import stripe
 import logging
 
+import string
+import random
+
 logger = logging.basicConfig(level=logging.DEBUG)
 #商品を買うために条件を満たす必要
 #貸し出し中のアイテムであること
@@ -17,6 +20,10 @@ logger = logging.basicConfig(level=logging.DEBUG)
 #購入が確定した場合に返却しなくても問題がないことがわかるようにする
 
 class BuyingReservationItemView(APIView):
+    #ユーザが見やすい一意の予約番号を発行する
+    #人にわかりやすい予約番号を重複せずに発行する方法を考える
+    #数字大文字小文字からランダムに１１桁の数値を作成する
+
     def payment(self, data, customer):
         response = stripe.PaymentIntent.create(
             customer = customer,
@@ -82,6 +89,12 @@ class OrderCreateView(generics.CreateAPIView):
     queryset = Order.objects.select_related('order_account', 'order_address').all()
     serializer_class = OrderSerializer
 
+    def get_reservation_number(self, length):
+        letters = string.ascii_letters
+        number = string.digits
+        num = ''.join(random.choice(letters + number) for i in range(length))
+        return num
+
     def post(self, request, *args, **kwargs):
         data = request.data
         ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -92,7 +105,7 @@ class OrderCreateView(generics.CreateAPIView):
         instance = Order.objects.select_related('order_account', 'order_address').create(
             user = request.user,
             payment_id = data['payment'],
-            order_id = data['order_id'],
+            order_id = self.get_reservation_number(11),
             total_price = data['total_price'],
             tax = data['tax'],
             status = 'Accepted',
@@ -112,7 +125,6 @@ class PaymentCreateView(generics.CreateAPIView):
             user = user,
             payment_method = data['payment_method'],
             payment_id = data['payment_id'],
-            amount_paid = data['amount_paid'],
         )
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

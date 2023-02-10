@@ -8,10 +8,11 @@ class ReservationAdmin(admin.ModelAdmin):
     list_filter = ['reserved_start_date']
     search_fields = ['id', 'status']
     
+    #発送連絡をしたときにやることリストも作成されるようにする
     def save_model(self, request, obj, form, change):
         update_fields = []
         if change:
-            if form.cleaned_data ==3:
+            if form.cleaned_data == 3:
                 update_fields.append('status')
                 update_fields.append('shipping_number')
                 obj.save(update_fields=update_fields)
@@ -39,7 +40,12 @@ class ReservationItemAdmin(admin.ModelAdmin):
         if change:
             if form.initial['review'] != form.cleaned_data['review']:
                 update_fields.append('review')
-        obj.save(update_fields=update_fields)
+                obj.save(update_fields=update_fields)
+            else:
+                obj.save()
+        else:
+            obj.save()
+
 
 admin.site.register(models.Reservation, ReservationAdmin)
 admin.site.register(models.ReservationItem, ReservationItemAdmin)

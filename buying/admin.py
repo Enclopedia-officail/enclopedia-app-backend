@@ -3,7 +3,7 @@ from . import models
 # Register your models here.
 
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'payment_method', 'payment_id', 'amount_paid', 'created_at')
+    list_display = ('id', 'user', 'payment_method', 'payment_id', 'created_at')
     list_per_page = 100
     search_fields = ['id', 'user__id', 'payment_id']
 

@@ -34,7 +34,6 @@ class OrderItemListTest(TestCase):
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
-            amount_paid = 1000
         )
         self.order = models.Order.objects.create(
             user = self.user,
@@ -86,7 +85,6 @@ class OrderItemListTest(TestCase):
     
     def test_order_item_list(self):
         res = self.client.get(ORDER_ITEM_LIST_URL, many=True)
-        print(res)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data[0]['is_ordered'], True)
 
@@ -106,7 +104,6 @@ class CreatePaymentTest(TestCase):
             user = user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
-            amount_paid = 1000
         )
 
         self.assertEqual(self.payment, payment.payment_id)
@@ -129,7 +126,6 @@ class PaymentCreateAPITest(TestCase):
         data = {
             'payment_method' : 'card',
             'payment_id' : 'fdsa08ca7st',
-            'amount_paid' : 1000
         }
 
         res = self.client.post(CREATE_PAYMNET_URL, data)
@@ -151,7 +147,6 @@ class OrderCreateAPITest(TestCase):
             user = self.user,
             payment_method = 'card',
             payment_id = 'fdsa08ca7st',
-            amount_paid = 1000
         )
         self.client.force_authenticate(self.user)
 
@@ -182,7 +177,6 @@ class BuyingPaymentSuccessTest(TestCase):
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
-            amount_paid = 1000
         )
         self.order = models.Order.objects.create(
             user = self.user,
@@ -220,7 +214,6 @@ class BuyingPaymentFailedTest(TestCase):
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
-            amount_paid = 1000
         )
         self.order = models.Order.objects.create(
             user = self.user,

@@ -22,7 +22,6 @@ class Payment(models.Model):
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='payment_account')
     payment_method = models.CharField(max_length=100, choices=method)
     payment_id = models.CharField(max_length=200, blank=True, null=True)
-    amount_paid = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -32,11 +31,12 @@ class Order(models.Model):
     STATUS = (
         ('Accepted', 'accepted'),
         ('Completed', 'completed'),
+        ('Denied', 'denied'),
         ('Cancelled', 'cancelled')
     )
 
     COUNTRY = (
-        ('JP', 0.1),
+        ( 0.1, 'JP'),
     )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='order_account', null=True)
@@ -62,6 +62,3 @@ class OrderItem(models.Model):
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    
-

@@ -8,7 +8,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'user', 'payment_method', 'payment_id', 'amount_paid', 'created_at']
+        fields = ['id', 'user', 'payment_method', 'payment_id', 'created_at']
 
 class OrderSerializer(serializers.ModelSerializer):
     user = AccountSerializer(read_only=True)
