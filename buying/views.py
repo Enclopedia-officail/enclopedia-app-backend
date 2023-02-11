@@ -27,7 +27,7 @@ class BuyingReservationItemView(APIView):
     def payment(self, data, customer):
         response = stripe.PaymentIntent.create(
             customer = customer,
-            payment_method_types=data['payment_method'],
+            payment_method_types=['card'],
             payment_method = data['payment_id'],
             currency="jpy",
             amount=data['total_price'],
@@ -44,8 +44,8 @@ class BuyingReservationItemView(APIView):
         if response['status'] == 'succeeded':
             #支払いが成功した場合
             instance.status = 'Completed'
-            instance.order_id = data['order_id']
-            instance.save(update_fields=['status', 'updated_at'])
+            instance.payment_intent_id = response['id']
+            instance.save(update_fields=['status', 'payment_intent_id'])
             message = {
                 'message': '商品の購入が完了しました'
             }
@@ -53,8 +53,12 @@ class BuyingReservationItemView(APIView):
         elif response['status'] == 'requires_payment_method':
             #支払いが失敗した場合の処理
             instance.status = 'Cancelled'
-            instance.save(update_fields=['status', 'updated_at'])
+            instance.payment_intent_id = response['id']
+            instance.save(update_fields=['status', 'payment_intent_id'])
             error = {'message': '支払いに失敗しました。'}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            error = {'message': '支払いを受付に失敗しました。'}
             return Response(error, status=status.HTTP_404_NOT_FOUND)
 
 class OrderItemListView(generics.ListAPIView):
@@ -75,8 +79,8 @@ class OrderItemCreateView(generics.CreateAPIView):
         data = request.data
         instance = OrderItem.objects.select_related('user', 'order', 'reservation_item').create(
             user = user,
-            order__id = data['order_id'],
-            reservation_item__id = data['reservation_item_id'],
+            order_id = data['order_id'],
+            reservation_item_id = data['reservation_item_id'],
             quantity = data['quantity'],
             is_ordered = True
         )
