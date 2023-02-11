@@ -39,7 +39,7 @@ class BuyingReservationItemView(APIView):
         data = request.data
         user = request.user
         stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
-        response = self.payment(data, stripe_customer)
+        response = self.payment(data, stripe_customer.customer_id)
         instance = get_object_or_404(Order.objects.select_related('user', 'payment'),id = data['order_id'])
         if response['status'] == 'succeeded':
             #支払いが成功した場合
@@ -121,6 +121,7 @@ class PaymentCreateView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         data = request.data
+        print(data['payment_method'])
         instance = Payment.objects.select_related('payment_account').create(
             user = user,
             payment_method = data['payment_method'],

@@ -7,10 +7,10 @@ import uuid
 #クレジットカード以外の支払い
 #振り込み以外の支払い方法を選択するようにする
 #コンビニ決済の導入 
-CREDIT = 'credit'
+CREDIT = 'card'
 STORE = 'store'
 method = (
-    (CREDIT, 'credit'),
+    (CREDIT, 'card'),
     (STORE, 'convenience_store_payment')
 )
 

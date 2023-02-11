@@ -153,7 +153,6 @@ class OrderCreateAPITest(TestCase):
     def test_create_order(self):
         data = {
             'payment': self.payment.id,
-            'order_id': 'asdfcasd',
             'total_price': 1000,
             'tax': 0.1,
         }
