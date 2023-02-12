@@ -66,7 +66,7 @@ class OrderItemGetView(generics.RetrieveAPIView):
     serializer_class = OrderItemSerializer
 
     def get(self, request, pk):
-        instance = get_object_or_404(self.queryset, id=pk)
+        instance = get_object_or_404(self.queryset, user=request.user,  reservation_item_id=pk)
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

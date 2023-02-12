@@ -225,7 +225,7 @@ class OrderItemGetTest(TestCase):
         )
     
     def test_order_item_get(self):
-        ORDER_ITEM_GET_URL = '/api/buying/order_item/{}'.format(self.order_item.id)
+        ORDER_ITEM_GET_URL = '/api/buying/order_item/{}'.format(self.reservation_item.id)
         res = self.client.get(ORDER_ITEM_GET_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 

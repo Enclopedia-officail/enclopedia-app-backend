@@ -22,7 +22,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     order = OrderSerializer(read_only=True)
     user = AccountSerializer(read_only=True)
-    reservation_item = ReservationItemSerializer
+    reservation_item = ReservationItemSerializer(read_only=True)
 
     class Meta:
         model = OrderItem
