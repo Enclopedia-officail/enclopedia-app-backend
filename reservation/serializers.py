@@ -61,7 +61,7 @@ class ReservationItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReservationItem
-        fields = ['id', 'product', 'reservation', 'quantity', 'review']
+        fields = ['id', 'product', 'reservation', 'quantity', 'review', 'is_bought']
 
 #product内の
 class ReservationItemUserSerializer(serializers.ModelSerializer):

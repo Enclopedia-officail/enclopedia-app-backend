@@ -8,8 +8,11 @@ from user.models import Adress
 from reservation.models import Reservation, ReservationItem
 from .. import models
 from unittest.mock import patch, MagicMock
+import environ
 
 #api url
+
+env = environ.Env()
 
 CREATE_PAYMNET_URL = reverse('buying:payment')
 CREATE_ORDER_URL = reverse('buying:order')
@@ -79,7 +82,6 @@ class OrderItemCreate(TestCase):
         data = {
             "order_id":self.order.id,
             "reservation_item_id": self.reservation_item.id,
-            "quantity": 1
         }
         res = self.client.post(CREATE_ORDER_ITEM_URL, data)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -148,7 +150,6 @@ class OrderItemListTest(TestCase):
             user=self.user,
             order = self.order,
             reservation_item = self.reservation_item,
-            quantity = 1,
             is_ordered = True,
         )
     
@@ -156,6 +157,77 @@ class OrderItemListTest(TestCase):
         res = self.client.get(ORDER_ITEM_LIST_URL, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data[0]['is_ordered'], True)
+
+
+class OrderItemGetTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            first_name = 'test',
+            last_name = 'test',
+            username = 'test',
+            email = 'test@example.com',
+            phone_number = '09001610001',
+            password = 'testpass123',
+        )
+        self.client.force_authenticate(self.user)
+        self.address = Adress.objects.get(user=self.user)
+        self.payment = models.Payment.objects.create(
+            user = self.user,
+            payment_method='card',
+            payment_id = 'fdsa08ca7st',
+        )
+        self.order = models.Order.objects.create(
+            user = self.user,
+            payment = self.payment,
+            order_id = 'payment',
+            total_price = 1000,
+            tax = 0.1,
+            status = 'Accepted',
+            ip = '127.0.0.7'
+        )
+
+        self.product = Product.objects.select_related('category', 'brand', 'price').create(
+            product_name = 'sample',
+            description = 'sample',
+            rating = 5.0,
+            review_count = 1,
+            stock = 1,
+            img = 'https://test.com',
+            is_available = True,
+            is_subscription = 'rental',
+        )
+
+        self.reservation = Reservation.objects.select_related('user', 'adress').create(
+            user = self.user,
+            adress = self.address,
+            is_reserved = True,
+            status = 3,
+            plan = 'basic',
+            ip = '127.0.0.1',
+            payment_method = 'card',
+            total_price = 1000,
+            shipping_price = 800,
+            shipping_number = '1201734'
+        )
+
+        self.reservation_item = ReservationItem.objects.select_related('product', 'reservation').create(
+            reservation = self.reservation,
+            product = self.product,
+            quantity = 1,
+        )
+
+        self.order_item =  models.OrderItem.objects.select_related('user', 'order', 'reservation_item').create(
+            user=self.user,
+            order = self.order,
+            reservation_item = self.reservation_item,
+            is_ordered = True,
+        )
+    
+    def test_order_item_get(self):
+        ORDER_ITEM_GET_URL = '/api/buying/order_item/{}'.format(self.order_item.id)
+        res = self.client.get(ORDER_ITEM_GET_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
 class CreatePaymentTest(TestCase):
     #payment modelが使用できるかのテスト

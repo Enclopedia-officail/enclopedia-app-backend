@@ -51,8 +51,8 @@ class Reservation(models.Model):
     plan = models.CharField(max_length=20, choices=PLAN)
     ip = models.CharField(max_length=30, blank=True)
     payment_method = models.CharField(max_length=30, blank=True, null=True)
-    total_price = models.IntegerField(blank=True, null=True)
-    shipping_price = models.IntegerField(blank=True, null=True)
+    total_price = models.IntegerField(default=0, blank=True, null=True)
+    shipping_price = models.IntegerField(default=0, blank=True, null=True)
     shippingNumberRegex = RegexValidator(regex= r"^\d{12}$")
     shipping_number = models.CharField(validators=[shippingNumberRegex],max_length=15, null=True, blank=True)
     return_shipping_number = models.CharField(validators=[shippingNumberRegex],max_length=15, null=True, blank=True)
@@ -69,6 +69,7 @@ class ReservationItem(models.Model):
     variation = models.ManyToManyField(Variation, blank=True, null=True)
     quantity = models.IntegerField(default=1)
     is_canceled = models.BooleanField(default=False)
+    is_bought = models.BooleanField(default=False)
     cancel_date = models.DateTimeField(blank=True, null=True)
     review = models.IntegerField(
         blank=True, null=True,

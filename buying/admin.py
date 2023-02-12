@@ -13,7 +13,7 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['id', 'user__id', 'order_d']
 
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'reservation_item', 'quantity', 'is_ordered', 'created_at', 'updated_at')
+    list_display = ('id', 'order', 'reservation_item', 'is_ordered', 'created_at', 'updated_at')
     list_per_page = 100
     search_fields = ['id', 'reservation_item__id', 'reservation_item__product__id']
 

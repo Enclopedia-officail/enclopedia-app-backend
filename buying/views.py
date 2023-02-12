@@ -40,7 +40,7 @@ class BuyingReservationItemView(APIView):
         user = request.user
         stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
         response = self.payment(data, stripe_customer.customer_id)
-        instance = get_object_or_404(Order.objects.select_related('user', 'payment'),id = data['order_id'])
+        instance = get_object_or_404(Order.objects.select_related('user', 'payment'), id = data['order_id'])
         if response['status'] == 'succeeded':
             #支払いが成功した場合
             instance.status = 'Completed'
@@ -60,6 +60,15 @@ class BuyingReservationItemView(APIView):
         else:
             error = {'message': '支払いを受付に失敗しました。'}
             return Response(error, status=status.HTTP_404_NOT_FOUND)
+
+class OrderItemGetView(generics.RetrieveAPIView):
+    queryset = OrderItem.objects.select_related('user', 'order', 'reservation_item').all()
+    serializer_class = OrderItemSerializer
+
+    def get(self, request, pk):
+        instance = get_object_or_404(self.queryset, id=pk)
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrderItemListView(generics.ListAPIView):
     queryset = OrderItem.objects.select_related('user', 'order', 'reservation_item').all()
@@ -81,12 +90,13 @@ class OrderItemCreateView(generics.CreateAPIView):
             user = user,
             order_id = data['order_id'],
             reservation_item_id = data['reservation_item_id'],
-            quantity = data['quantity'],
             is_ordered = True
         )
+        reservation_item = instance.reservation_item
+        reservation_item.is_bought = True
+        reservation_item.save()
         serializer = self.serializer_class(instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 class OrderCreateView(generics.CreateAPIView):
 

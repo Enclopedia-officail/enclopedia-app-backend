@@ -30,7 +30,7 @@ class ReservationAdmin(admin.ModelAdmin):
 
 
 class ReservationItemAdmin(admin.ModelAdmin):
-    list_display=['id', 'product', 'quantity']
+    list_display=['id', 'product', 'quantity', 'is_bought']
     search_fields = ['id', 'reservation__id']
     raw_id_fields = ['product']
 

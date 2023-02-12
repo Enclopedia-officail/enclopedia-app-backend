@@ -59,7 +59,6 @@ class OrderItem(models.Model):
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True,  related_name='order_item_account')
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_item')
     reservation_item = models.ForeignKey(ReservationItem, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
