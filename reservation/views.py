@@ -29,6 +29,20 @@ class ReservationPagination(pagination.PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 20
 
+class ReservationGetView(generics.RetrieveAPIView):
+    serializer_class = ReservationSerializer
+    queryset = Reservation.objects.select_related(
+        'user', 'adress'
+    ).all()
+
+    def get(self, request, pk):
+        reservation = get_object_or_404(self.queryset, id=pk, user=request.user)
+        if reservation.status == 3:
+            serializer = self.serializer_class(reservation)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
 class ReservationLatestDataView(generics.RetrieveAPIView):
     serializer_class = ResrevationListSerializer
     queryset = Reservation.objects.select_related(

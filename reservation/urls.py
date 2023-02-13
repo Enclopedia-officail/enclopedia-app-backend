@@ -4,6 +4,7 @@ from . import views
 app_name = 'reservation'
 
 urlpatterns = [
+    path('<uuid:pk>',views.ReservationGetView.as_view()),
     path('item/', views.ReservationCreateView.as_view(), name='reservation'),
     path('item/<uuid:pk>', views.GetReservationItemView.as_view(), name='get_reservation_item'),
     path('list/', views.ReservationListItemView.as_view(), name="reservation_list"),
