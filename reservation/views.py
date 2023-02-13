@@ -15,7 +15,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from cart.models import CartItem, Cart
 from subscription.models import StripeAccount
-from rest_framework.permissions import IsAuthenticated
 
 import datetime
 import calendar
