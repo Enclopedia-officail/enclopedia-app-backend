@@ -5,10 +5,17 @@ from .models import ReservationItem
 from user.models import Credibility
 from .serializers import ReservationItemSerializer
 from django.core.mail import EmailMessage
-from decimal import Decimal
+import environ
+import os
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+env = environ.Env()
+env.read_env(os.path.join(settings.BASE_DIR, '.env'))
 
 
 #reservation登録が成功した場合と失敗場合の処理をする
@@ -172,7 +179,6 @@ def return_favorite_product_notification(instance):
                             from_email=email,
                             to=[favorite.user.email]
                         )
-                        print(favorite.user.email)
                         msg.template_id="d-5b0f16837150416fa01a3027eefe2211"
                         msg.dynamic_template_data = {
                             "first_name": favorite.user.first_name,
@@ -194,3 +200,38 @@ def return_product(instance):
     credibility = Credibility.objects.select_related('user').get(user=user)
     credibility.review += Decimal(number[review])
     credibility.save()
+
+from notification.models import Todo
+
+#商品の発送が完了した場合にやることリストに返却を追加する
+#
+@shared_task
+def return_product_todo(instance):
+    user = instance.user
+    title= '期日までにアイテムの返却を行なってください'
+    reservation_content_type = ContentType.objects.get(app_label='reservation', model='reservation')
+    reservationItems = ReservationItem.objects.select_related('product', 'reservation').filter(reservation=instance)
+    todo_objects = []
+    todo = Todo(
+        user=user,
+        title=title,
+        thumbnail=reservationItems[0].product.img,
+        url=os.path.join(env('FRONTEND_URL'), 'shipping/{}'.format(instance.id)),
+        content_type=reservation_content_type,
+        object_id=instance.id
+    )
+    todo_objects.append(todo)
+    reservation_item_content_type = ContentType.objects.get(app_label='reservation', model='reservationitem')
+    for item in reservationItems:
+        title = 'レンタルしたアイテム{}を購入することができます'.format(item.product.product_name)
+        todo = Todo(
+            user=user,
+            title=title,
+            thumbnail=item.product.img,
+            url=os.path.join(env('FRONTEND_URL'), 'buying/{}'.format(item.id)),
+            content_type=reservation_item_content_type,
+            object_id=item.id
+        )
+        todo_objects.append(todo)
+    Todo.objects.bulk_create(todo_objects)
+    logger.info('やることリストの作成に成功しました。')

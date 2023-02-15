@@ -38,6 +38,7 @@ def reservation_notification(sender, instance, update_fields, *args, **kwargs):
             elif int(instance.status) == 2:
                 task.create_reservation_failed_notification(instance)
             elif int(instance.status) == 3:
+                task.return_product_todo(instance)
                 task.shipping_product_notification(instance)
                 #返却をやることリストに追加する処置を行う
             elif int(instance.status) == 4:

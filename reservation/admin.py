@@ -12,11 +12,12 @@ class ReservationAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         update_fields = []
         if change:
-            if form.cleaned_data == 3:
+            if form.cleaned_data['status'] == 3:
                 update_fields.append('status')
                 update_fields.append('shipping_number')
+                update_fields.append('return_shipping_number')
                 obj.save(update_fields=update_fields)
-            elif form.cleaned_data == 5:
+            elif form.cleaned_data['status'] == 5:
                 update_fields.append('status')
                 update_fields.append('return_date')
                 time = datetime.datetime.now()

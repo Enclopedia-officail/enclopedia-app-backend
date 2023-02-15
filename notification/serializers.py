@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.contrib.contenttypes.models import ContentType
 from .models import Read, News, Notification, Todo
 
 #ポリモーフィック獲得時にはtitleとidのみ必要
