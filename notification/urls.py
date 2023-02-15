@@ -12,5 +12,6 @@ urlpatterns = [
     path('<int:pk>/', views.NotificationRetreiveView.as_view()),
     path('todo/list/', views.TodoListView.as_view(), name='todo_list'),
     path('todo/<int:pk>', views.TodoCompletedView.as_view()),
-    path('todo/item/return/<uuid:pk>', views.TodoReturnItemView.as_view())
+    path('todo/item/return', views.TodoReturnItemView.as_view()),
+    path('todo/item/purchased/<uuid:pk>', views.TodoPurchasedView.as_view())
 ]

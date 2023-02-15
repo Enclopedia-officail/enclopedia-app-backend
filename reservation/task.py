@@ -216,7 +216,7 @@ def return_product_todo(instance):
         user=user,
         title=title,
         thumbnail=reservationItems[0].product.img,
-        url=os.path.join(env('FRONTEND_URL'), 'shipping/{}'.format(instance.id)),
+        url='/shipping/{}'.format(instance.id),
         content_type=reservation_content_type,
         object_id=instance.id
     )
@@ -228,7 +228,7 @@ def return_product_todo(instance):
             user=user,
             title=title,
             thumbnail=item.product.img,
-            url=os.path.join(env('FRONTEND_URL'), 'buying/{}'.format(item.id)),
+            url= '/buying/{}'.format(item.id),
             content_type=reservation_item_content_type,
             object_id=item.id
         )

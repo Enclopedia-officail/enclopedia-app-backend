@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework import generics
 from rest_framework import status
+from django.contrib.contenttypes.models import ContentType
 from .models import News, Notification, Read, Todo
 from .serializers import ListReadSerialzier, NewsSerializer, NewsListSerialzier, NotificationListSerializer, NotificationSerializer, TodoSerializer
 
@@ -83,7 +84,7 @@ class NotificationListView(generics.ListAPIView):
 #完了していないやることリストを一覧で取得する
 class TodoListView(generics.ListAPIView):
     serializer_class = TodoSerializer
-    queryset = Todo.objects.order_by('-created_at').select_related('user').all()
+    queryset = Todo.objects.select_related('user').all()
     def get(self, request):
         user = request.user
         todo = get_list_or_404(self.queryset, user=user, todo=False)
@@ -100,14 +101,26 @@ class TodoCompletedView(generics.UpdateAPIView):
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+#返却された際にはcontent_typeがreservation, reservationitemでtodoがfalseのものを全てtrueに置き換える必要がある
 class TodoReturnItemView(generics.UpdateAPIView):
     serializer_class = TodoSerializer
     queryset = Todo.objects.select_related('user').all()
+    def put(self, request, *args, **kwargs):
+        reservation_type = ContentType.objects.get(app_label='reservation', model='reservation')
+        reservation_item_type = ContentType.objects.get(app_label='reservation', model='reservationitem')
+        instances = get_list_or_404(self.queryset, user=request.user, todo=False, content_type__in=[reservation_type, reservation_item_type])
+        for instance in instances:
+            instance.todo = request.data['todo']
+        Todo.objects.bulk_update(instances,fields=["todo"])
+        return Response(status=status.HTTP_200_OK)
+
+#アイテムを購入した際にtodoをtrueにする
+class TodoPurchasedView(generics.UpdateAPIView):
+    serializer_class = TodoSerializer
+    queryset = Todo.objects.select_related('user').all()
+
     def put(self, request, pk, *args, **kwargs):
-        print('hello')
         instance = get_object_or_404(self.queryset, user=request.user, object_id=pk)
-        print(instance)
         instance.todo = request.data['todo']
         instance.save()
-        serializer = self.serializer_class(instance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
