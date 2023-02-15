@@ -21,3 +21,4 @@ class  NewsAdmin(admin.ModelAdmin):
 admin.site.register(models.Read, ReadAdmin)
 admin.site.register(models.Notification, NotificationAdmin)
 admin.site.register(models.News, NewsAdmin)
+admin.site.register(models.Todo)

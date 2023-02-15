@@ -46,5 +46,5 @@ class ListReadSerialzier(serializers.ModelSerializer):
 class TodoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Todo
-        fields = ['id', 'title', 'created_at', 'url', 'todo']
+        fields = ['id', 'title', 'created_at', 'url', 'todo', 'content_type', 'object_id']
 

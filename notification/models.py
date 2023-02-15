@@ -38,7 +38,10 @@ class Notification(Activitie):
     def __str__(self):
         return self.title
 
+#genericの使用方法をもう一度読み直した後再度どのようなモデルにするのか検討する必要がある
 #push通知の実装が必要になってくる
+#uuidでgenericで複数のtableをforeignkeyとして登録できようにする必要
+#おそらく逆参照する必要あhなあう
 class Todo(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -47,6 +50,9 @@ class Todo(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     url = models.URLField()
     todo = models.BooleanField(default=False)
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
+    object_id = models.UUIDField(null=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
         return self.title
