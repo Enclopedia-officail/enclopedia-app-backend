@@ -99,5 +99,5 @@ class TodoPurchasedItemTest(TestCase):
     def test_purchased_item(self):
         TODO_ITEM_PURCHASED_URL = '/api/notification/todo/item/purchased/{}'.format(self.reservationitem.id)
         data = {'todo': True, 'reservation_item_id': self.reservationitem.id}
-        res = self.client.put(TODO_ITEM_PURCHASED_URL, data)
+        res = self.client.patch(TODO_ITEM_PURCHASED_URL, data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)

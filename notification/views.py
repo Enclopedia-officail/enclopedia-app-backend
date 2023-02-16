@@ -110,7 +110,7 @@ class TodoReturnItemView(generics.UpdateAPIView):
         reservation_item_type = ContentType.objects.get(app_label='reservation', model='reservationitem')
         instances = get_list_or_404(self.queryset, user=request.user, todo=False, content_type__in=[reservation_type, reservation_item_type])
         for instance in instances:
-            instance.todo = request.data['todo']
+            instance.todo = True
         Todo.objects.bulk_update(instances,fields=["todo"])
         return Response(status=status.HTTP_200_OK)
 
@@ -119,8 +119,8 @@ class TodoPurchasedView(generics.UpdateAPIView):
     serializer_class = TodoSerializer
     queryset = Todo.objects.select_related('user').all()
 
-    def put(self, request, pk, *args, **kwargs):
+    def update(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(self.queryset, user=request.user, object_id=pk)
-        instance.todo = request.data['todo']
+        instance.todo = True
         instance.save()
         return Response(status=status.HTTP_200_OK)
