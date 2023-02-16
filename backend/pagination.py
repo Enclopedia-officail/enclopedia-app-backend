@@ -5,9 +5,9 @@ from rest_framework.pagination import (
 from rest_framework.response import Response
 
 class BasicPagination(PageNumberPagination):
-    page_size = 60
+    page_size = 40
     count_local = 0
-    max_page_size = 60
+    max_page_size = 40
 
     def __init__(self):
         super().__init__()

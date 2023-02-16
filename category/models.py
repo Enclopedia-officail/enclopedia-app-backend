@@ -1,6 +1,5 @@
 from django.db import models
 import uuid
-from django.conf import settings
 import time
 
 def upload_img(instance, filename):
@@ -22,6 +21,7 @@ class Type(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     category_name = models.CharField(max_length=30, unique=True)
     image = models.FileField(upload_to=upload_type)
+    created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta():
         verbose_name = 'タイプ'
@@ -35,6 +35,7 @@ class Category(models.Model):
     category_name = models.CharField(max_length=100)
     image = models.FileField(upload_to=upload_category)
     type = models.ForeignKey(Type, on_delete=models.CASCADE, blank=True, null=True, related_name='type')
+    created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta():
         verbose_name = 'カテゴリー'
