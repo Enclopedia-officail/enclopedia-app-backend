@@ -21,22 +21,22 @@ logger = logging.getLogger(__name__)
 # prefetch_related productをするかどうかs
 class TypeListView(generics.ListAPIView):
     permission_classes = (AllowAny,)
-    queryset = Type.objects.all()
+    queryset = Type.objects.order_by('created_at').all()
     serializer_class = TypeSerializer
     pagination_class = None
 
 class CategoryListView(generics.ListAPIView):
     "get category list with id of type"
     permission_classes = (AllowAny,)
-    queryset = Type.objects.all()
+    queryset = Type.objects.order_by('created_at').all()
     serializer_class = CategorySerializer
     pagination_class = None
 
     def get(self, request):
         try:
             id = request.GET['type']
-            type = Type.objects.prefetch_related('type').get(id=id)
-            categorys = type.type.all()
+            type = Type.objects.prefetch_related('type').order_by('created_at').get(id=id)
+            categorys = type.type.order_by('created_at').all()
             serializer = self.serializer_class(categorys, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
@@ -45,7 +45,7 @@ class CategoryListView(generics.ListAPIView):
 
 class CategorySearchListView(generics.ListAPIView):
     permission_classes = (AllowAny, )
-    queryset = Category.objects.all()
+    queryset = Category.objects.order_by('created_at').all()
     serializer_class = CategorySerializer
 
     def get(self, request):
