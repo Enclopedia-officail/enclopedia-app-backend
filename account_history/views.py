@@ -141,7 +141,9 @@ class SearchHistoryView(APIView):
 
             user = request.user
             data = byte_to_str(list(self.redisClient.smembers(str(user.id) + 'search')))
-            if len(data) < 15:
+            if len(data) == 0:
+                return Response(status=status.HTTP_404_)
+            elif len(data) < 15:
                 return Response(data, status=status.HTTP_200_OK)
 
             else:
