@@ -958,7 +958,7 @@ class ReviewRatingCreateView(generics.CreateAPIView):
             client_addr = ip.split(',')[0]
         else:
             client_addr = request.META.get('REMOTE_ADDR')
-        reservation = Reservation.objects.filter(user=request.user,reservationitem__product=product)
+        reservation = get_list_or_404(Reservation, user=request.user, reservationitem__product_id=product)
         if len(reservation) > 0:
             res = ReviewRating.objects.select_related('account', 'product').create(
                 user=request.user,
@@ -972,7 +972,7 @@ class ReviewRatingCreateView(generics.CreateAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             message = {'message':'レンタルしたことがないアイテムに口コミ投稿することはできません。'}
-            return Response(message, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(message, status=status.HTTP_404_NOT_FOUND)
 
 class ReviewList(generics.ListAPIView):
     """各プロダクトのレビューを全て取得"""
