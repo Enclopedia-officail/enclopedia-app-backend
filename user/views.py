@@ -247,7 +247,7 @@ class SendgridRecipientView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 class SendgridContactView(APIView):
 
-    def post(self, request):
+    def post(self, request, pk):
         data = request.data
         try:
             #recipient idを保存する必要がある
@@ -255,7 +255,7 @@ class SendgridContactView(APIView):
             #header情報を富要する
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
             #sendgridのメールリストに単一のメールアドレスを追加する
-            url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=data['recipient_id'])
+            url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=pk)
             data = [{
                 'email': data['email'],
             }]
@@ -270,14 +270,12 @@ class SendgridContactView(APIView):
             return Response(message, status=status.HTTP_404_NOT_FOUND)
     
     #emailを更新した際にsendgridも更新する
-    def update(self, request, *args, **kwargs):
+    def update(self, request, pk, *args, **kwargs):
         try:
             instance = EmailSubscribe.objects.get(user=request.user)
             data = request.data
             secret = settings.SENDGRID_API_KEY
             header = {'Content-type':'application/json', 'Authorization':'Bearer ' + secret}
-            print('start')
-            print(instance.recipient_id)
             url = "https://api.sendgrid.com/v3/contactdb/recipients/{recipient_id}".format(recipient_id=instance.recipient_id)
             requests.delete(url, headers=header)
             print('delete')
@@ -290,7 +288,6 @@ class SendgridContactView(APIView):
             response = requests.post(url, headers=header, data=json.dumps(data))
             instance.recipient_id = response.json()["persisted_recipients"][0]
             instance.save()
-            print('success')
             if instance.is_active:
                 url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=instance.recipient_id)
                 data = [{
@@ -306,13 +303,12 @@ class SendgridContactView(APIView):
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
     #group unsubscriptionに登録と削除でmarktingメールを送信するかどうか決定。
-    def delete(self, request):
+    def delete(self, request, pk):
         #sendgrid 配信リストからuerのemailを削除するためのapiを叩く
-        data = request.data
         try:
             secret = settings.SENDGRID_API_KEY
             header = {'Content-type': 'application/json', 'Authorization': 'Bearer ' + secret}
-            url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=data['recipient_id'])
+            url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id='21186891', recipient_id=pk)
             response = requests.delete(url, headers=header)
             return Response(response, status.HTTP_200_OK)
         except:

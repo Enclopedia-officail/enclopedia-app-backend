@@ -19,7 +19,7 @@ urlpatterns = [
     path('/register_confirm',
          views.AccountRegisterConfirmation.as_view(), name='confirmation'),
     path('/password/change', views.UserConfirmView.as_view(), name='confirm'),
-    path('/sendgrid/contact', views.SendgridContactView.as_view(), name='sendgrid_contact'),
+    path('/sendgrid/contact/<str:pk>', views.SendgridContactView.as_view(), name='sendgrid_contact'),
     path('/sendgrid/recipient', views.SendgridRecipientView.as_view()),
     path('/sendgrid/suppressions/', views.SendgridSuppressionsView.as_view(), name='sendgrid_suppressions'),
     path('/email/subscribe', views.EmailSubscribeView.as_view(), name='email_subscribe'),
