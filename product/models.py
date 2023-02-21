@@ -148,13 +148,23 @@ class Product(models.Model):
         return count
 
 cloth_size = (
+    ('XXS', 'xxs'),
     ('XS', 'xs'),
     ('S', 's'),
     ('M', 'm'),
     ('L', 'l'),
     ('XL', 'xl'),
     ('XXL', 'xxl'),
-    ('FREE', 'free')
+    ('FREE', 'free'),
+    ('26', '26'),
+    ('28', '28'),
+    ('30', '30'),
+    ('32', '32'),
+    ('34', '34'),
+    ('36', '36'),
+    ('38', '38'),
+    ('40', '40'),
+    ('42', '42'),
 )
 
 class Size(models.Model):
