@@ -39,6 +39,7 @@ class SizeAdmin(admin.ModelAdmin):
     list_display = ('product', 'size')
     list_per_page = 100
     search_fields = ['product__id', 'product__product_name']
+    raw_id_fields = ['product']
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Variation, VariationAdmin)
