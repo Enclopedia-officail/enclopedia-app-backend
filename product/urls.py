@@ -94,5 +94,5 @@ urlpatterns = [
     path('tag/list/', views.TagListProductGetView.as_view()),
     path('tag/search/', views.TagListAPIVIew.as_view()),
     path('related/', views.RelatedProductListViwe.as_view(), name='related_product'),
-    path('search_word/', views.SearchWordView.as_view()),
+    path('search_word/', cache_page(views.SearchWordView.as_view(), TIME_OUTS_1DAY)),
 ]
