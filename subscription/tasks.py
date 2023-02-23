@@ -110,21 +110,21 @@ def update_subscription_payment_fail_notification(instance):
     #サブスクリプション更新料の支払いに失敗
     try:
         Notification.objects.create(
-            user=instance,
+            user=instance.user_id,
             title="サブスクリプション更新料金の支払いに失敗しました",
-            desription="{first_name}{last_name}Enclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+            body="{first_name}{last_name}Enclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
                 \nサブスクリプション更新料金の支払いに失敗しました。\
                 \nお支払いが完了するまで一時的に商品のレンタルをすることができなくなりますのでご了承ください。"
-        )
+        ).format(first_name=instance.user_id.first_nmae, last_name=instance.user_id.last_name)
 
         msg = EmailMessage(
             from_email="operation@enclopediai-info.com",
-            to=[instance.user.email]
+            to=[instance.user_id.email]
         )
         msg.template_id="d-215f2c14ea9943a2bddced9f5e123f46"
         msg.dynamic_template_date = {
-            'frist_name': instance.user.first_name,
-            'last_name': instance.user.last_name,
+            'frist_name': instance.user_id.first_name,
+            'last_name': instance.user_id.last_name,
         }
         msg.send(fail_silently=False)
     except:
@@ -133,54 +133,47 @@ def update_subscription_payment_fail_notification(instance):
 
 @shared_task
 def subscription_update_confirmation_notification(instance):
-    #サブスクリプション更新日から一週間前の通知
-    try:
-        Notification(
-            usre=instance,
-            title="サブスクリプション更新期日の数日前となりました。",
-            description="{first_name}{last_name}Enclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-                \nサブスクリプション更新期日の数日前となりました。詳細に関してましてはアカウント管理画面のサブスクリプションからご確認ください。\
-                \n今後ともEnclopediaファッションレンタルサービスをよろしくお願い致します。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name)
-        )
-        msg = EmailMessage(
-            from_email="operation@enclopediai-info.com",
-            to=[instance.user.email]
-        )
-        msg.template_id="d-74ab4b5cbd3f4a228a87b45510361bb1"
-        msg.dynamic_template_date = {
-            'frist_name': instance.user.first_name,
-            'last_name': instance.user.last_name,
-        }
-        msg.send(fail_silently=False)
-    except:
-        logging.info('サブスクリプション更新料金催促通知 user:{} に通知失敗'.format(instance.user_id.id))
-
+#サブスクリプション更新日から一週間前の通知
+    Notification.objects.create(
+        user=instance.user_id,
+        title="サブスクリプション更新期日の数日前となりました。",
+        body="{first_name}{last_name}Enclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+            \nサブスクリプション更新期日の数日前となりました。詳細に関してましてはアカウント管理画面のサブスクリプションからご確認ください。\
+            \n今後ともEnclopediaファッションレンタルサービスをよろしくお願い致します。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name)
+    )
+    msg = EmailMessage(
+        from_email="operation@enclopediai-info.com",
+        to=[instance.user_id.email]
+    )
+    msg.template_id="d-74ab4b5cbd3f4a228a87b45510361bb1"
+    msg.dynamic_template_date = {
+        'first_name': instance.user_id.first_name,
+        'last_name': instance.user_id.last_name,
+    }
+    msg.send(fail_silently=False)
 
 @shared_task
 def subscription_update_paid_success(instance):
     #サブスクリプション更新支払い成功時の通知
-    try:
-        title="サブスクリプション更新のお支払いが完了しました"
-        description="{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-            \nサブスクリプション{plan}プランへの変更が完了しました、引き続きサービスのご利用をお楽しみください。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name, plan=instance.plan)
-        Notification(
-            user=instance.user,
-            title=title,
-            description=description
-        )
-        msg = EmailMessage(
-            from_email="operation@enclopediai-info.com",
-            to=[instance.user.email]
-        )
-        msg.template_id="d-8afc3812a6b14cbb924c3f9d25d4f35f"
-        msg.dynamic_template_date = {
-            'frist_name': instance.user.first_name,
-            'last_name': instance.user.last_name,
-            'plan': instance.plan
-        }
-        msg.send(fail_silently=False)
-    except:
-        logging.debug('サブスクリプション更新完了通知 user:{} 通知失敗'.format(instance.user_id.id))
+    title="サブスクリプション更新のお支払いが完了しました"
+    description="{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+        \nサブスクリプション{plan}プランへの変更が完了しました、引き続きサービスのご利用をお楽しみください。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name, plan=instance.plan)
+    Notification.objects.create(
+        user=instance.user_id,
+        title=title,
+        body=description
+    )
+    msg = EmailMessage(
+        from_email="operation@enclopediai-info.com",
+        to=[instance.user_id.email]
+    )
+    msg.template_id="d-8afc3812a6b14cbb924c3f9d25d4f35f"
+    msg.dynamic_template_date = {
+        'first_name': instance.user_id.first_name,
+        'last_name': instance.user_id.last_name,
+        'plan': instance.plan
+    }
+    msg.send(fail_silently=False)
 
 from datetime import datetime, timedelta
 
