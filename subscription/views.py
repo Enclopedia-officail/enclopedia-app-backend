@@ -802,6 +802,7 @@ def webhook_view(request):
     if event['type'] == 'checkout.session.async_payment_successed':
     #サブスクリプション更新支払い完了時時のイベントをトリガー
         checkout = event['data']['object']
+        return Response(status=status.HTTP_200_OK)
     elif event['type'] == 'checkout.session.async_payment_failed':
     #サブスクリプション更新時支払い失敗のイベントをトリガー
         #サブスクリプションの支払い時のもみ応答するwebhook
@@ -809,7 +810,7 @@ def webhook_view(request):
         stripe_account = StripeAccount.objects.get(customer_id=checkout.customer)
         stripe_account.is_active = False
         stripe_account.save()
-
+        return Response(status=status.HTTP_200_OK)
     #subscriptionの数日前に発生する
     elif event['type'] == 'invoice.upcoming':
     #寒くリプション更新時の
