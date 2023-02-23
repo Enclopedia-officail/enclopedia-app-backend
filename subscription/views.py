@@ -805,15 +805,15 @@ def webhook_view(request):
     #こちらで更新時の支払いの成功と失敗の処理を判別し処理を実行する
     if event['type'] == 'invoice.updated':
         data = event['data']['object']
-        stripe_account = StripeAccount.objects.get(customer_id=data.customer)
-        if data['paid'] == True & data['status'] == 'paid':
+        stripe_account = StripeAccount.objects.get(customer_id=data['customer'])
+        if data['paid'] == True and data['status'] == 'paid':
             #更新支払いが完了した場合に処理を行う
             today = datetime.datetime.now()
             stripe_account.update_date = today
             stripe_account.save()
             tasks.subscription_update_paid_success(stripe_account)
-            return Response(statue=status.HTTP_200_OK)
-        elif data['paid'] == False & data['status'] == 'open':
+            return Response(status=status.HTTP_200_OK)
+        elif data['paid'] == False and data['status'] == 'open':
             #サブスクリプション更新支払いが失敗した場合にはこちらの処理が行われる
             stripe_account.is_active = False
             stripe_account.save()
@@ -825,13 +825,11 @@ def webhook_view(request):
     #subscriptionの更新数日前に発生する
     elif event['type'] == 'invoice.upcoming':
     #サブスクリプションの更新の数日前に通知を行う
-        try:
-            data = event['data']['object']
-            stripe_account = StripeAccount.objects.get(customer_id=data.customer)
-            tasks.subscription_update_confirmation_notification(stripe_account.user_id)
-            return Response(status=status.HTTP_200_OK)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        data = event['data']['object']
+        stripe_account = StripeAccount.objects.get(customer_id=data['customer'])
+        tasks.subscription_update_confirmation_notification(stripe_account)
+        return Response(status=status.HTTP_200_OK)
+
     #if event['type'] == 'invoice.paid':
     #サブスクリプションの支払いが完了したことを通知する
     #data = event['data']['object']
@@ -851,7 +849,7 @@ def webhook_view(request):
             #stripe_account.update_date = today
             #stripe_account.save()
             #taskから更新完了メールの送信
-            r#eturn Response(status=status.HTTP_200_OK)
+            #return Response(status=status.HTTP_200_OK)
         #except:
             #logger.debug('通知に失敗')
             #return Response(status=status.HTTP_200_OK)
@@ -865,7 +863,7 @@ def webhook_view(request):
             #tasks.update_subscription_payment_fail_notification(stripe_account)
             #stripe_account.is_active = False
             #stripe_account.save()
-            r#eturn Response(status=status.HTTP_200_OK)
+            #return Response(status=status.HTTP_200_OK)
         #except:
             #logger.error('サブスクリプション登録情報更新に失敗')
             #return Response(status=status.HTTP_200_OK)
