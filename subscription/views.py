@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from .serializers import StripeSubscriptionSerializer
 from django.utils import timezone
 import datetime
@@ -781,7 +782,9 @@ class SetupIntentView(APIView):
         info = stripe.SetupIntent.list(customer=customer.customer_id)
         stripe.SetupIntent.cancel(info.data[0].id)
         return Response('成功')
-        
+
+@api_view(["POST",])
+@permission_classes([AllowAny])
 @csrf_exempt
 def webhook_view(request):
     """function to related stripe webhook"""
@@ -802,7 +805,6 @@ def webhook_view(request):
     if event['type'] == 'checkout.session.async_payment_successed':
     #サブスクリプション更新支払い完了時時のイベントをトリガー
         checkout = event['data']['object']
-        return Response(status=status.HTTP_200_OK)
     elif event['type'] == 'checkout.session.async_payment_failed':
     #サブスクリプション更新時支払い失敗のイベントをトリガー
         #サブスクリプションの支払い時のもみ応答するwebhook
@@ -810,7 +812,7 @@ def webhook_view(request):
         stripe_account = StripeAccount.objects.get(customer_id=checkout.customer)
         stripe_account.is_active = False
         stripe_account.save()
-        return Response(status=status.HTTP_200_OK)
+
     #subscriptionの数日前に発生する
     elif event['type'] == 'invoice.upcoming':
     #寒くリプション更新時の
