@@ -20,6 +20,7 @@ class ReservationAdmin(admin.ModelAdmin):
             elif form.cleaned_data['status'] == 5:
                 update_fields.append('status')
                 update_fields.append('return_date')
+                update_fields.append('is_reserved')
                 time = datetime.datetime.now()
                 obj.return_date = time
                 obj.save(update_fields=update_fields)
