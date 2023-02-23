@@ -121,7 +121,7 @@ def update_subscription_payment_fail_notification(instance):
             from_email="operation@enclopediai-info.com",
             to=[instance.user.email]
         )
-        msg.template_id=""
+        msg.template_id="d-215f2c14ea9943a2bddced9f5e123f46"
         msg.dynamic_template_date = {
             'frist_name': instance.user.first_name,
             'last_name': instance.user.last_name,
@@ -137,14 +137,16 @@ def subscription_update_confirmation_notification(instance):
     try:
         Notification(
             usre=instance,
-            title="サブスクリプション更新日の一週間前になりました",
-            description="{first_name}{last_name}Enclopediaファッションレンタルサービスをご利用いただきありがとうございます。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name)
+            title="サブスクリプション更新期日の数日前となりました。",
+            description="{first_name}{last_name}Enclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
+                \nサブスクリプション更新期日の数日前となりました。詳細に関してましてはアカウント管理画面のサブスクリプションからご確認ください。\
+                \n今後ともEnclopediaファッションレンタルサービスをよろしくお願い致します。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name)
         )
         msg = EmailMessage(
             from_email="operation@enclopediai-info.com",
             to=[instance.user.email]
         )
-        msg.template_id=""
+        msg.template_id="d-74ab4b5cbd3f4a228a87b45510361bb1"
         msg.dynamic_template_date = {
             'frist_name': instance.user.first_name,
             'last_name': instance.user.last_name,
@@ -158,7 +160,7 @@ def subscription_update_confirmation_notification(instance):
 def subscription_update_paid_success(instance):
     #サブスクリプション更新支払い成功時の通知
     try:
-        title="サブスクリプション更新おしはらいが完了しました"
+        title="サブスクリプション更新のお支払いが完了しました"
         description="{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
             \nサブスクリプション{plan}プランへの変更が完了しました、引き続きサービスのご利用をお楽しみください。".format(first_name=instance.user_id.first_name, last_name=instance.user_id.last_name, plan=instance.plan)
         Notification(
@@ -170,12 +172,11 @@ def subscription_update_paid_success(instance):
             from_email="operation@enclopediai-info.com",
             to=[instance.user.email]
         )
-        msg.template_id=""
+        msg.template_id="d-8afc3812a6b14cbb924c3f9d25d4f35f"
         msg.dynamic_template_date = {
             'frist_name': instance.user.first_name,
             'last_name': instance.user.last_name,
-            'title': title,
-            'description': description
+            'plan': instance.plan
         }
         msg.send(fail_silently=False)
     except:

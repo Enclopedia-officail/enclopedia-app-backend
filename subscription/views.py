@@ -801,21 +801,30 @@ def webhook_view(request):
         raise e
     except stripe.error.SignatureVerificationError as e:
         raise e
+    #支払い成功時に通知を送るようにする必要がある
+    #こちらで更新時の支払いの成功と失敗の処理を判別し処理を実行する
+    if event['type'] == 'invoice.updated':
+        data = event['data']['object']
+        stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+        if data['paid'] == True & data['status'] == 'paid':
+            #更新支払いが完了した場合に処理を行う
+            today = datetime.datetime.now()
+            stripe_account.update_date = today
+            stripe_account.save()
+            tasks.subscription_update_paid_success(stripe_account)
+            return Response(statue=status.HTTP_200_OK)
+        elif data['paid'] == False & data['status'] == 'open':
+            #サブスクリプション更新支払いが失敗した場合にはこちらの処理が行われる
+            stripe_account.is_active = False
+            stripe_account.save()
+            tasks.update_subscription_payment_fail_notification(stripe_account)
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if event['type'] == 'checkout.session.async_payment_successed':
-    #サブスクリプション更新支払い完了時時のイベントをトリガー
-        checkout = event['data']['object']
-    elif event['type'] == 'checkout.session.async_payment_failed':
-    #サブスクリプション更新時支払い失敗のイベントをトリガー
-        #サブスクリプションの支払い時のもみ応答するwebhook
-        checkout = event['data']['object']
-        stripe_account = StripeAccount.objects.get(customer_id=checkout.customer)
-        stripe_account.is_active = False
-        stripe_account.save()
-
-    #subscriptionの数日前に発生する
+    #subscriptionの更新数日前に発生する
     elif event['type'] == 'invoice.upcoming':
-    #寒くリプション更新時の
+    #サブスクリプションの更新の数日前に通知を行う
         try:
             data = event['data']['object']
             stripe_account = StripeAccount.objects.get(customer_id=data.customer)
@@ -823,48 +832,48 @@ def webhook_view(request):
             return Response(status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
-    elif event['type'] == 'invoice.payment_succeeded':
+    #if event['type'] == 'invoice.paid':
+    #サブスクリプションの支払いが完了したことを通知する
+    #data = event['data']['object']
+        #stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+        #try:
+            #tasks.subscription_update_paid_success(stripe_account)
+            #return Response(status=status.HTTP_200_OK)
+        #except:
+            #logger.debug('サブスクリプション更新の通知に失敗しました。')
+            #return Response(status=status.HTTP_200_OK)
+    #elif event['type'] == 'invoice.payment_succeeded':
     #サブスクリプション更新日の支払いが完了時に通知
-    #支払いが完了したことを伝えるメールと通知を送信し、update_dateを更新する
-        data = event['data']['object']
-        try:
-            today = datetime.datetime.now()
-            stripe_account = StripeAccount.objects.get(customer_id=data.customer)
-            stripe_account.update_date = today
-            stripe_account.save()
+        #data = event['data']['object']
+        #try:
+            #today = datetime.datetime.now()
+            #stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+            #stripe_account.update_date = today
+            #stripe_account.save()
             #taskから更新完了メールの送信
-            return Response(status=status.HTTP_200_OK)
-        except:
-            logger.debug('通知に失敗')
-            return Response(status=status.HTTP_200_OK)
-    elif event['type'] == 'invoice.payment_failed':
-        #サブスクリプション更新の支払いが失敗すると更新される
-        data = event['data']['object']
-        stripe_account = StripeAccount.objects.get(customer_id=data.customer)
-        stripe_account.is_active = False
+            r#eturn Response(status=status.HTTP_200_OK)
+        #except:
+            #logger.debug('通知に失敗')
+            #return Response(status=status.HTTP_200_OK)
+    #elif event['type'] == 'invoice.payment_failed':
+        ##サブスクリプション更新の支払いが失敗すると更新される
+        #data = event['data']['object']
+        #stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+        #stripe_account.is_active = False
         #支払いができなかったことを通知し一時的にサブスクリプションが利用できなくなることを通知する
-        try:
-            tasks.update_subscription_payment_fail_notification(stripe_account)
-            stripe_account.is_active = False
-            stripe_account.save()
-            return Response(status=status.HTTP_200_OK)
-        except:
-            logger.error('サブスクリプション登録情報更新に失敗')
-            return Response(status=status.HTTP_200_OK)
-    elif event['type'] == 'invoice.paid':
-        #サブスクリプションの支払いが完了したことを通知する
-        data = event['data']['object']
-        stripe_account = StripeAccount.objects.get(customer_id=data.customer)
-        try:
-            tasks.subscription_update_paid_success(stripe_account)
-            return Response(status=status.HTTP_200_OK)
-        except:
-            logger.debug('サブスクリプション更新の通知に失敗しました。')
-            return Response(status=status.HTTP_200_OK)
-    elif event['type'] == 'payment_method.updated':
+        #try:
+            #tasks.update_subscription_payment_fail_notification(stripe_account)
+            #stripe_account.is_active = False
+            #stripe_account.save()
+            r#eturn Response(status=status.HTTP_200_OK)
+        #except:
+            #logger.error('サブスクリプション登録情報更新に失敗')
+            #return Response(status=status.HTTP_200_OK)
+
+    #elif event['type'] == 'payment_method.updated':
         #カードの更新時の通知
-        data = event['data']['object']
-        stripe_account = StripeAccount.objects.get(customer_id=data.customer)
+        #data = event['data']['object']
+        #stripe_account = StripeAccount.objects.get(customer_id=data.customer)
     else:
         logger.error('イベントのハンドリングに失敗しました {}'.format(event['type']))
         return Response(status=status.HTTP_404_NOT_FOUND)
