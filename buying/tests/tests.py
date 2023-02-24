@@ -67,7 +67,6 @@ class OrderItemCreate(TestCase):
             status = 3,
             plan = 'basic',
             ip = '127.0.0.1',
-            payment_method = 'card',
             total_price = 1000,
             shipping_price = 800,
             shipping_number = '1201734'
@@ -135,7 +134,6 @@ class OrderItemListTest(TestCase):
             status = 3,
             plan = 'basic',
             ip = '127.0.0.1',
-            payment_method = 'card',
             total_price = 1000,
             shipping_price = 800,
             shipping_number = '1201734'
@@ -206,7 +204,6 @@ class OrderItemGetTest(TestCase):
             status = 3,
             plan = 'basic',
             ip = '127.0.0.1',
-            payment_method = 'card',
             total_price = 1000,
             shipping_price = 800,
             shipping_number = '1201734'

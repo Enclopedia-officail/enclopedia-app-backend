@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import StripeAccount
+from .models import StripeAccount, Payment
 from user.serializers import AccountSerializer
 
 class StripeSubscriptionSerializer(serializers.ModelSerializer):
@@ -12,4 +12,5 @@ class PaymentSerializer(serializers.ModelSerializer):
     user = AccountSerializer(read_only=True)
 
     class Meta:
+        model = Payment
         fields = ['id', 'user', 'payment_method', 'payment_id', 'created_at']
