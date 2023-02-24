@@ -2,13 +2,9 @@ from rest_framework import serializers
 from .models import Payment, Order, OrderItem
 from user.serializers import AccountSerializer
 from reservation.serializers import ReservationItemSerializer
+from subscription.serializers import PaymentSerializer
 
-class PaymentSerializer(serializers.ModelSerializer):
-    user = AccountSerializer(read_only=True)
 
-    class Meta:
-        model = Payment
-        fields = ['id', 'user', 'payment_method', 'payment_id', 'created_at']
 
 class OrderSerializer(serializers.ModelSerializer):
     user = AccountSerializer(read_only=True)

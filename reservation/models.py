@@ -7,7 +7,7 @@ from product.models import Product, Variation
 from user.models import Account, Adress
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
-from buying.models import Payment
+from subscription.models import Payment
 import uuid
 
 auth_user = settings.AUTH_USER_MODEL if getattr(

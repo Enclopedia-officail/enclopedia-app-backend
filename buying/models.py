@@ -1,31 +1,13 @@
 from django.db import models
 from user.models import Account
 from reservation.models import ReservationItem
+from subscription.models import Payment
 import uuid
 # Create your models here.
 
 #クレジットカード以外の支払い
 #振り込み以外の支払い方法を選択するようにする
 #コンビニ決済の導入 
-CREDIT = 'card'
-STORE = 'store'
-method = (
-    (CREDIT, 'card'),
-    (STORE, 'convenience_store_payment')
-)
-
-#reservationのなからのみ購入することができるようにする
-class Payment(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True
-    )
-    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='payment_account')
-    payment_method = models.CharField(max_length=100, choices=method)
-    payment_id = models.CharField(max_length=200)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.payment_id
 
 class Order(models.Model):
     STATUS = (

@@ -7,6 +7,7 @@ from product.models import Product
 from user.models import Adress
 from reservation.models import Reservation, ReservationItem
 from .. import models
+from subscription.models import Payment
 from unittest.mock import patch, MagicMock
 import environ
 
@@ -33,7 +34,7 @@ class OrderItemCreate(TestCase):
         )
         self.client.force_authenticate(self.user)
         self.address = Adress.objects.get(user=self.user)
-        self.payment = models.Payment.objects.create(
+        self.payment = Payment.objects.create(
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
@@ -101,7 +102,7 @@ class OrderItemListTest(TestCase):
         )
         self.client.force_authenticate(self.user)
         self.address = Adress.objects.get(user=self.user)
-        self.payment = models.Payment.objects.create(
+        self.payment = Payment.objects.create(
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
@@ -172,7 +173,7 @@ class OrderItemGetTest(TestCase):
         )
         self.client.force_authenticate(self.user)
         self.address = Adress.objects.get(user=self.user)
-        self.payment = models.Payment.objects.create(
+        self.payment = Payment.objects.create(
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
@@ -241,7 +242,7 @@ class CreatePaymentTest(TestCase):
             password = 'testpass123',
         )
 
-        payment = models.Payment.objects.create(
+        payment = Payment.objects.create(
             user = user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
@@ -284,7 +285,7 @@ class OrderCreateAPITest(TestCase):
             phone_number = '09001610001',
             password = 'testpass123',
         )
-        self.payment = models.Payment.objects.select_related('user').create(
+        self.payment = Payment.objects.select_related('user').create(
             user = self.user,
             payment_method = 'card',
             payment_id = 'fdsa08ca7st',
@@ -313,7 +314,7 @@ class BuyingPaymentSuccessTest(TestCase):
             password = 'testpass123',
         )
         self.client.force_authenticate(self.user)
-        self.payment = models.Payment.objects.create(
+        self.payment = Payment.objects.create(
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',
@@ -350,7 +351,7 @@ class BuyingPaymentFailedTest(TestCase):
             password = 'testpass123',
         )
         self.client.force_authenticate(self.user)        
-        self.payment = models.Payment.objects.create(
+        self.payment = Payment.objects.create(
             user = self.user,
             payment_method='card',
             payment_id = 'fdsa08ca7st',

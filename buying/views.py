@@ -1,12 +1,13 @@
-from .models import Payment, Order, OrderItem
-from .serializers import OrderSerializer, OrderItemSerializer, PaymentSerializer
+from .models import Order, OrderItem
+from .serializers import OrderSerializer, OrderItemSerializer
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404, get_list_or_404
 from subscription.models import StripeAccount
-
+from subscription.serializers import PaymentSerializer
+from subscription.models import Payment
 import stripe
 import logging
 
