@@ -14,7 +14,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import StripeSubscriptionSerializer
 from django.utils import timezone
-from buying.models import Payment
+from reservation.models import Payment
 import datetime
 import environ
 import stripe
