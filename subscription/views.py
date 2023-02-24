@@ -379,7 +379,7 @@ class StripeCheckoutView(APIView):
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
                             #statusをacceptにする
-                            payment = create_payment_object(user, response["payment_method_types"], response["id"])
+                            payment = create_payment_object(user, response["payment_method_types"][0], response["id"])
                             create_reservation.status = 1
                             create_reservation.is_reserved = True
                             create_reservation.payment = payment
@@ -394,7 +394,7 @@ class StripeCheckoutView(APIView):
                         # 支払いが失敗した場合の処理
                         # 支払いに失敗したら例外を発生させなければならない
                         elif response.data['status'] == 'requires_payment_method':
-                            payment = create_payment_object(user, response["payment_method_types"], response["id"])
+                            payment = create_payment_object(user, response["payment_method_types"][0], response["id"])
                             create_reservation.status = 2
                             create_reservation.is_reserved = False
                             create_reservation.payment = payment
