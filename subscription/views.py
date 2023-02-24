@@ -14,6 +14,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import StripeSubscriptionSerializer
 from django.utils import timezone
+from buying.models import Payment
 import datetime
 import environ
 import stripe
@@ -34,9 +35,14 @@ stripe.set_app_info(
     version='0.0.1',
     url='https://github.com/sttipe-samples/subscription-use-cases/fixed-price')
 
-# stripeに登録したサブスクリプションプラン料金表を返すようにする。
 
-# subscriptionプランに関して
+def create_payment_object(user, payment_method, payment_id):
+    instance = Payment.objects.select_related('user').create(
+        user = user,
+        payment_method = payment_method,
+        payment_id = payment_id,
+    )
+    return instance
 
 
 class StripeConfigView(APIView):
@@ -204,7 +210,6 @@ class StripeCustomerView(APIView):
                         }
                     return Response(data, status=status.HTTP_200_OK)
                 else:
-                    print('changed premiume plan to basic plan')
                     subscription_info = stripe.Subscription.list(
                     customer=customer.customer_id,
                     status='active'
@@ -374,9 +379,11 @@ class StripeCheckoutView(APIView):
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
                             #statusをacceptにする
+                            payment = create_payment_object(user, response["payment_method_types"], response["id"])
                             create_reservation.status = 1
                             create_reservation.is_reserved = True
-                            create_reservation.save(update_fields=["status", "is_reserved"])
+                            create_reservation.payment = payment
+                            create_reservation.save(update_fields=["status", "is_reserved", "payment"])
                             # cartアイテムも同時に削除されるようにする
                             Cart.objects.get(user=user).delete()
                             data = {
@@ -387,9 +394,11 @@ class StripeCheckoutView(APIView):
                         # 支払いが失敗した場合の処理
                         # 支払いに失敗したら例外を発生させなければならない
                         elif response.data['status'] == 'requires_payment_method':
+                            payment = create_payment_object(user, response["payment_method_types"], response["id"])
                             create_reservation.status = 2
                             create_reservation.is_reserved = False
-                            create_reservation.save(update_fields=["status", "is_reserved"])
+                            create_reservation.payment = payment
+                            create_reservation.save(update_fields=["status", "is_reserved", "payment"])
                             for cartitem in cartitems:
                                 ReservationItem.objects.create(
                                     reservation=create_reservation,
@@ -490,7 +499,6 @@ class CreditInfoListView(APIView):
         #カスタマーにアタッチしたpaymentMethodを削除する
         try:
             payment_method = request.GET['payment_method']
-            print(payment_method)
             stripe.PaymentMethod.detach(payment_method)
             customer = StripeAccount.objects.get(user_id=request.user)
             stripe_customer = stripe.Customer.retrieve(customer.customer_id)
@@ -735,6 +743,15 @@ class StripeInvoiceView(APIView):
             message = {'message': 'インボイスを取得できませんでした'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
+#個々のアイテムに対して支払ったInvoiceを取得
+class ReceiptView(APIView):
+    def get(self, request, pk):
+        invoice = stripe.Invoice.retrieve(pk)
+        data = {
+            'invoice_url': invoice['hosted_invoice_url']
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
 class SetupIntentView(APIView):
     
     def get(self, request):
@@ -875,5 +892,3 @@ def webhook_view(request):
     else:
         logger.error('イベントのハンドリングに失敗しました {}'.format(event['type']))
         return Response(status=status.HTTP_404_NOT_FOUND)
-
-    return Response(success=True, status=status.HTTP_200_OK)

@@ -7,6 +7,7 @@ from product.models import Product, Variation
 from user.models import Account, Adress
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
+from buying.models import Payment
 import uuid
 
 auth_user = settings.AUTH_USER_MODEL if getattr(
@@ -50,7 +51,7 @@ class Reservation(models.Model):
     status = models.SmallIntegerField(choices=status, default=REQUESTED)
     plan = models.CharField(max_length=20, choices=PLAN)
     ip = models.CharField(max_length=30, blank=True)
-    payment_method = models.CharField(max_length=30, blank=True, null=True)
+    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     total_price = models.IntegerField(default=0, blank=True, null=True)
     shipping_price = models.IntegerField(default=0, blank=True, null=True)
     shippingNumberRegex = RegexValidator(regex= r"^\d{12}$")
