@@ -2,16 +2,18 @@ from rest_framework import serializers
 from rest_framework.serializers import SerializerMethodField
 from .models import Reservation, ReservationItem
 from product.serailizers import ProductSerializer
+from subscription.serializers import PaymentSerializer
 
 
 class ReservationSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
         choices=[0, 1, 2, 3, 4, 5]
     )
+    payment = PaymentSerializer(read_only=True)
 
     class Meta:
         model = Reservation
-        fields = ['id', 'reserved_start_date', 'reserved_end_date', 'is_reserved',
+        fields = ['id', 'payment', 'reserved_start_date', 'reserved_end_date', 'is_reserved',
                   'status', 'plan', 'total_price', 'shipping_price', 'shipping_number', 'return_shipping_number','return_date']
 
 #shipping情報とstatusを入れ替える

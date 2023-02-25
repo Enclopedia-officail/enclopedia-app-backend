@@ -746,11 +746,15 @@ class StripeInvoiceView(APIView):
 #個々のアイテムに対して支払ったInvoiceを取得
 class ReceiptView(APIView):
     def get(self, request, pk):
-        invoice = stripe.Invoice.retrieve(pk)
-        data = {
-            'invoice_url': invoice['hosted_invoice_url']
-        }
-        return Response(data, status=status.HTTP_200_OK)
+        payment_intent = stripe.PaymentIntent.retrieve(pk)
+        if payment_intent['invoice']:
+            invoice = stripe.Invoice.retrieve(payment_intent['invoice'])
+            data = {
+                'invoice_url': invoice['hosted_invoice_url']
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 class SetupIntentView(APIView):
     
