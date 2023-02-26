@@ -41,7 +41,7 @@ class Payment(models.Model):
     )
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='payment_account')
     payment_method = models.CharField(max_length=100, choices=method)
-    payment_id = models.CharField(max_length=200)
+    payment_id = models.CharField(max_length=200, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

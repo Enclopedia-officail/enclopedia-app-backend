@@ -258,7 +258,7 @@ class StripeCustomerView(APIView):
         user = request.user
         stripe_account = StripeAccount.objects.get(user_id=user)
         status_list = [1,3,4]
-        reservation = Reservation.objects.select_related('user','adress').filter(user_id=user, status__in=status_list)
+        reservation = Reservation.objects.select_related('user','adress', 'payment').filter(user_id=user, status__in=status_list)
         #reservationが空
         if reservation:
             data = {
@@ -746,17 +746,20 @@ class StripeInvoiceView(APIView):
 
 #アイテムを購入した場合のインボイス
 class ReceiptView(APIView):
-    def get(self, request, pk):
-
-        payment_intent = stripe.PaymentIntent.retrieve(pk)
-        if payment_intent['invoice']:
-            invoice = stripe.Invoice.retrieve(payment_intent['invoice'])
-            data = {
-                'invoice_url': invoice['hosted_invoice_url']
-            }
-            return Response(data, status=status.HTTP_200_OK)
+    def get(self, request):
+        id = request.GET['reservation_id']
+        instance = Reservation.objects.select_related('user', 'address', 'payment').get(id=id)
+        if instance:
+            payment_intent = stripe.PaymentIntent.retrieve(instance.payment.payment_id)
+            if payment_intent:
+                data = {
+                    'invoice_url': payment_intent['charges']['data'][0]['receipt_url']
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(payment_intent,status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 class BuyingReceiptView(APIView):
     def get(self, request):

@@ -19,5 +19,6 @@ urlpatterns = [
     path('webhook/', views.webhook_view, name='webhook'),
     path('invoice/', views.StripeInvoiceView.as_view(), name='invoice'),
     path('setup_intent/', views.SetupIntentView.as_view(), name='set_up_intent'),
+    path('reservation/receipt/', views.ReceiptView.as_view()),
     path('buying/receipt/', views.BuyingReceiptView.as_view()),
 ]

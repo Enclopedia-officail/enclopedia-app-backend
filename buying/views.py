@@ -142,7 +142,7 @@ class PaymentCreateView(generics.CreateAPIView):
         instance = Payment.objects.select_related('payment_account').create(
             user = user,
             payment_method = data['payment_method'],
-            payment_id = data['payment_id'],
+            payment_id = None,
         )
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
