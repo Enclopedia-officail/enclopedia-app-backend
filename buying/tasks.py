@@ -13,8 +13,8 @@ def order_completed_notification(instance):
     try:
         title = '注文した商品のお支払いが完了しました。'
         body = '{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-            \n注文した{item}のお支払いが完了しました。\
-            \n購入したアイテムに関してまして返却は必要ありませんのでそのままご利用いただけます。'
+            \n注文したアイテム{item}のお支払いが完了しました。\
+            \n購入したアイテムに関してまして返却は必要ありませんのでそのままご利用いただけます。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name, item=instance.reservation_item.product.product_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -41,10 +41,10 @@ def order_canceled_notification(instance):
     try:
         title = '注文した商品のお支払いが失敗しました。'
         body = '{first_name}{last_name}さまいつもEnclopediaファッションレンタルサービスをご利用いただきありがとうございます。\
-            \n注文した{item}のお支払いが失敗しまたし。\
+            \n注文したアイテムのお支払いに失敗しまたし。\
             \n現在ご登録いただいているお支払い情報に請求を行うことができませんでした。\
             お手数をおかけしますが現在登録いただいているお支払い情報をアカウントの管理から\
-            更新くださいますよう、よろしくお願いいたします。'
+            更新くださいますよう、よろしくお願いいたします。'.format(first_name=instance.user.first_name, last_name=instance.user.last_name)
         Notification.objects.create(
             user=instance.user,
             title=title,
@@ -58,7 +58,6 @@ def order_canceled_notification(instance):
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
-            "item": instance.reservation_item.product.product_name
         }
         msg.send(fail_silently=False)
     except:

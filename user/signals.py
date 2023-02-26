@@ -7,7 +7,6 @@ from .tasks import create_sendgrid_contact, send_register_confirmation_email, se
 from .tasks import send_social_login_register_email, authentication_phone_number
 
 #from axes.signals import user_locked_out
-import time
 import logging
 
 logger = logging.getLogger(__name__)
