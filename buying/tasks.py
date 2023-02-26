@@ -24,7 +24,7 @@ def order_completed_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
-        msg.tempalte_id='d-c8278c649a7047f28c6dc7e6eecb44f7'
+        msg.template_id='d-c8278c649a7047f28c6dc7e6eecb44f7'
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
@@ -54,7 +54,7 @@ def order_canceled_notification(instance):
             from_email=email,
             to=[instance.user.email]
         )
-        msg.tempalte_id='d-5418a157f4a94645a8f71ffb8926da65'
+        msg.template_id='d-5418a157f4a94645a8f71ffb8926da65'
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
