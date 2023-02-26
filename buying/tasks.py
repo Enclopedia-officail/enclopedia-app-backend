@@ -28,7 +28,7 @@ def order_completed_notification(instance):
         msg.dynamic_template_data = {
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
-            "item": instance.reservation_item.product.product_name,
+            "product_name": instance.reservation_item.product.product_name,
             "img": instance.reservation_item.product.img
         }
         msg.send(fail_silently=False)
