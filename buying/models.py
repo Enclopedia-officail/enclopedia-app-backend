@@ -23,7 +23,6 @@ class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='order_account', null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, related_name='order_payment', null=True)
-    payment_intent_id = models.CharField(max_length=200, blank=True, null=True)
     order_id = models.CharField(max_length=100, unique=True)
     total_price = models.IntegerField()
     tax = models.FloatField(choices=COUNTRY)

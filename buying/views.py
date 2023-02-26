@@ -42,20 +42,23 @@ class BuyingReservationItemView(APIView):
         stripe_customer = StripeAccount.objects.select_related('user_id').get(user_id=user)
         response = self.payment(data, stripe_customer.customer_id)
         instance = get_object_or_404(Order.objects.select_related('user', 'payment'), id = data['order_id'])
+        payment = get_object_or_404(Payment, id=instance.payment.id)
         if response['status'] == 'succeeded':
             #支払いが成功した場合
+            payment.payment_id = response['id']
+            payment.save()
             instance.status = 'Completed'
-            instance.payment_intent_id = response['id']
-            instance.save(update_fields=['status', 'payment_intent_id'])
-            message = {
+            instance.save(update_fields=['status'])
+            message = { 
                 'message': '商品の購入が完了しました'
             }
             return Response(message, status=status.HTTP_200_OK)
         elif response['status'] == 'requires_payment_method':
             #支払いが失敗した場合の処理
+            payment.payment_id = response['id']
             instance.status = 'Cancelled'
-            instance.payment_intent_id = response['id']
-            instance.save(update_fields=['status', 'payment_intent_id'])
+            payment.save()
+            instance.save(update_fields=['status'])
             error = {'message': '支払いに失敗しました。'}
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -136,7 +139,6 @@ class PaymentCreateView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         data = request.data
-        print(data['payment_method'])
         instance = Payment.objects.select_related('payment_account').create(
             user = user,
             payment_method = data['payment_method'],
@@ -144,6 +146,3 @@ class PaymentCreateView(generics.CreateAPIView):
         )
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-    

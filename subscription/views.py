@@ -15,6 +15,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .serializers import StripeSubscriptionSerializer
 from django.utils import timezone
 from reservation.models import Payment
+from buying.models import OrderItem
 import datetime
 import environ
 import stripe
@@ -743,9 +744,10 @@ class StripeInvoiceView(APIView):
             message = {'message': 'インボイスを取得できませんでした'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-#個々のアイテムに対して支払ったInvoiceを取得
+#アイテムを購入した場合のインボイス
 class ReceiptView(APIView):
     def get(self, request, pk):
+
         payment_intent = stripe.PaymentIntent.retrieve(pk)
         if payment_intent['invoice']:
             invoice = stripe.Invoice.retrieve(payment_intent['invoice'])
@@ -754,7 +756,24 @@ class ReceiptView(APIView):
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
+            return Response(payment_intent,status=status.HTTP_200_OK)
+
+class BuyingReceiptView(APIView):
+    def get(self, request):
+        id = request.GET['order']
+        instance = OrderItem.objects.select_related('user', 'order', 'reservation_item').get(user=request.user, reservation_item=id)
+        if instance:
+            payment_intent = stripe.PaymentIntent.retrieve(instance.order.payment.payment_id)
+            if payment_intent:
+                data = {
+                    'invoice_url': payment_intent['charges']['data'][0]['receipt_url']
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
 
 class SetupIntentView(APIView):
     

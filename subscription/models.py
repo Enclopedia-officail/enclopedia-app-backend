@@ -32,7 +32,7 @@ CREDIT = 'card'
 STORE = 'store'
 method = (
     (CREDIT, 'card'),
-    (STORE, 'convenience_store_payment')
+    (STORE, 'store')
 )
 #reservationのなからのみ購入することができるようにする
 class Payment(models.Model):
