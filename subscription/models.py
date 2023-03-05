@@ -46,4 +46,35 @@ class Payment(models.Model):
 
     def __str__(self):
         return str(self.id)
+currency = (
+    ('jpy', 'jpy'),
+)
+
+duration = (
+    ('once', 'once'),
+    ('repeting', 'repeting'),
+    ('forever', 'forever')
+)
+
+class Coupon(models.Model):
+    #独自のidを発行
+    #値引き料
+    amount_off = models.IntegerField(null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+    #使用通過
+    currency = models.CharField(max_length=3, choices=currency, default='jpy')
+    #クーポン使用回数
+    duration = models.CharField(max_length=30, choices=duration)
+    #サブスクリプションで下記で指定された分割引く
+    duration_month = models.IntegerField()
+    #クーポンの発行枚数
+    max_redemptions = models.IntegerField()
+    name = models.CharField(max_length=50)
+    percent_off = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
+    times_redeemed = models.IntegerField()
+    redeem_by = models.DateField()
+
+    def __str__(self):
+        return self.name
+
 
