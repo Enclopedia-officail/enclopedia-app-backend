@@ -59,6 +59,7 @@ duration = (
 class Coupon(models.Model):
     #独自のidを発行
     #値引き料
+    id = models.CharField(max_length=20, primary_key=True, unique=True)
     amount_off = models.IntegerField(null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     #使用通過
