@@ -331,7 +331,7 @@ EMAIL_USE_TLS = True
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 
 sentry_sdk.init(
-    dsn="https://examplePublicKey@o0.ingest.sentry.io/0",
+    dsn="https://330afbd915674bf3bbcb5818780e2fbb@o1248006.ingest.sentry.io/6408006",
     integrations=[DjangoIntegration()],
 
     # Set traces_sample_rate to 1.0 to capture 100%
