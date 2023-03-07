@@ -17,6 +17,7 @@ def cache_page(view, timeouts=TIME_OURTS_MINUTES):
 app_name = 'product'
 
 urlpatterns = [
+    path('all', views.AllProductsView.as_view()),
     path('search/', cache_page(views.ProductSearch.as_view(), TIME_OUTS_HOUR), name='prduct_search'),
     path('search/evaluation_order/',
          cache_page(views.ProductSearchReviewListView.as_view(), TIME_OUTS_HOUR), name='search_evaluation'),
