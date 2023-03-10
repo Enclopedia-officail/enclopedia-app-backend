@@ -918,3 +918,12 @@ def webhook_view(request):
     else:
         logger.error('イベントのハンドリングに失敗しました {}'.format(event['type']))
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+from .models import Coupon
+    
+class CouponDiscountView(APIView):
+
+    def post(self, request, pk):
+        instance = get_object_or_404(Coupon, pk)
+        if instance:
+            pass

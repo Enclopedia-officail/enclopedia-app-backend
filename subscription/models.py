@@ -56,10 +56,17 @@ duration = (
     ('forever', 'forever')
 )
 
+type = (
+    ('subscription', 'subscription'),
+    ('rental', 'rental'),
+    ('purchase', 'purchase')
+)
+
 class Coupon(models.Model):
     #独自のidを発行
     #値引き料
     id = models.CharField(max_length=20, primary_key=True, unique=True)
+    type = models.CharField(max_length=30, choices=type)
     amount_off = models.IntegerField(null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     #使用通過
