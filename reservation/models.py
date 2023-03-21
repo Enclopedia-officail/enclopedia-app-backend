@@ -41,6 +41,17 @@ class Reservation(models.Model):
         (PREMIUM, 'premium'),
     )
 
+    DELIVERYTIME = (
+        ('午前中', '午前中'),
+        ('12時〜14時頃'),#ゆうパックのみ
+        ('14時〜16時頃'),
+        ('16時〜18時頃'),
+        ('18時〜20時頃'),
+        ('19時〜21時頃'),
+        ('20時〜21時頃'),
+
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     adress = models.ForeignKey(Adress, on_delete=models.CASCADE)
@@ -58,6 +69,7 @@ class Reservation(models.Model):
     shipping_number = models.CharField(validators=[shippingNumberRegex],max_length=15, null=True, blank=True)
     return_shipping_number = models.CharField(validators=[shippingNumberRegex],max_length=15, null=True, blank=True)
     return_date = models.DateTimeField(blank=True, null=True)
+    delivery_time = models.CharField(max_length=50, choices=DELIVERYTIME, null=True, default=None)
 
     def __str__(self):
         return str(self.id)

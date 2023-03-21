@@ -313,6 +313,7 @@ class StripeCheckoutView(APIView):
         total_price=data['total_price']
         shipping_price=data['shipping_price']
         reserved_end_date=data['reserved_end_date']
+        delivery_time = data['delivery_time']
 
         status_list = [1,3,4]
         reservations = Reservation.objects.select_related(
@@ -384,6 +385,7 @@ class StripeCheckoutView(APIView):
                             create_reservation.status = 1
                             create_reservation.is_reserved = True
                             create_reservation.payment = payment
+                            create_reservation.delivery_time = delivery_time
                             create_reservation.save(update_fields=["status", "is_reserved", "payment"])
                             # cartアイテムも同時に削除されるようにする
                             Cart.objects.get(user=user).delete()
