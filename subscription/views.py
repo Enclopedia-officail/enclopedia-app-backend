@@ -386,7 +386,7 @@ class StripeCheckoutView(APIView):
                             create_reservation.is_reserved = True
                             create_reservation.payment = payment
                             create_reservation.delivery_time = delivery_time
-                            create_reservation.save(update_fields=["status", "is_reserved", "payment"])
+                            create_reservation.save(update_fields=["status", "is_reserved", "payment", "delivery_time"])
                             # cartアイテムも同時に削除されるようにする
                             Cart.objects.get(user=user).delete()
                             data = {
