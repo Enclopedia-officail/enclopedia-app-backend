@@ -172,6 +172,7 @@ class ReservationCreateView(APIView):
         plan = data['plan']
         constract_date = data['contract_date']
         cart = data['cart']
+        delivery_time = data['delivery_time']
         user = request.user
         status_list = [1, 3, 4, 5]
         reservation = Reservation.objects.order_by('-reserved_start_date').select_related('user', 'adress').filter(
@@ -218,10 +219,12 @@ class ReservationCreateView(APIView):
 
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
+                                    reservation_item.save(update_fields=["variation"])
 
                             create_reservation.status = 1
                             create_reservation.is_reserved = True
-                            create_reservation.save(update_fields=["status","is_reserved"])
+                            create_reservation.delivery_time = delivery_time
+                            create_reservation.save(update_fields=["status","is_reserved", "delivery_time"])
                             # 予約が完了するればカートを削除する
                             Cart.objects.get(user=user).delete()
                             data = {
@@ -256,11 +259,12 @@ class ReservationCreateView(APIView):
 
                             if cartitem.variation.exists():
                                 reservation_item.variation.add(cartitem.variation)
-
+                                reservation_item.save(update_fields=["variation"])
                         # stutasをacceptedにする
                         create_reservation.status = 1
                         create_reservation.is_reserved = True
-                        create_reservation.save(update_fields=["status","is_reserved"])
+                        create_reservation.delivery_time = delivery_time
+                        create_reservation.save(update_fields=["status","is_reserved", "delivery_time"])
                         # 予約が完了するればカートを削除する
                         Cart.objects.get(user=user).delete()
                         data = {
@@ -280,7 +284,7 @@ class ReservationCreateView(APIView):
                     )
                     if cartitem.variation.exists():
                         reservation_item.variation.add(cartitem.variation)
-
+                        reservation_item.save(update_fields=["variation"])
                 create_reservation.status = 2
                 create_reservation.save(update_fields=["status"])
                 Cart.objects.get(user=user).delete()
@@ -330,10 +334,11 @@ class ReservationCreateView(APIView):
                                 )
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
-
+                                    reservation_item.save(update_fields=["variation"])
                             create_reaservation.status = 1
                             create_reaservation.is_reserved = True
-                            create_reaservation.save(update_fields=["status","is_reserved"])
+                            create_reaservation.delivery_time = delivery_time
+                            create_reaservation.save(update_fields=["status","is_reserved", "delivery_time"])
                             Cart.objects.get(user=user).delete()
                         data = {
                                 'title': '予約が完了しました',
@@ -373,10 +378,11 @@ class ReservationCreateView(APIView):
                             )
                             if cartitem.variation.exists():
                                 reservation_item.variation.add(cartitem.variation)
-
+                                reservation_item.save(update_fields=["variation"])
                         create_reaservation.status = 1
                         create_reaservation.is_reserved = True
-                        create_reaservation.save(update_fields=["status","is_reserved"])
+                        create_reaservation.delivery_time = delivery_time
+                        create_reaservation.save(update_fields=["status","is_reserved", "delivery_time"])
                         Cart.objects.get(user=user).delete()
                     data = {
                                 'title': '予約が完了しました',
@@ -398,6 +404,7 @@ class ReservationCreateView(APIView):
                         )
                         if cartitem.variation.exists():
                             reservation_item.variation.add(cartitem.variation)
+                            reservation_item.save(update_fields=["variation"])
                 error = {
                     'title': '商品の予約に失敗しました',
                     'message': '商品の予約に失敗しました、現在予約中の商品があるか在庫がない場合がございます'}

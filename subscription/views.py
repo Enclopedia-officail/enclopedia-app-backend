@@ -380,6 +380,7 @@ class StripeCheckoutView(APIView):
                                 )
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
+                                    reservation_item.save(update_fields=["variation"])
                             #statusをacceptにする
                             payment = create_payment_object(user, response["payment_method_types"][0], response["id"])
                             create_reservation.status = 1
@@ -403,13 +404,14 @@ class StripeCheckoutView(APIView):
                             create_reservation.payment = payment
                             create_reservation.save(update_fields=["status", "is_reserved", "payment"])
                             for cartitem in cartitems:
-                                ReservationItem.objects.create(
+                                reservation_item = ReservationItem.objects.create(
                                     reservation=create_reservation,
                                     product=cartitem.product,
                                     quantity=cartitem.quantite
                                 )
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
+                                    reservation_item.save(update_fields=["variation"])
                             message = {
                                 'title' : '支払いに失敗しました。',
                                 'message':'支払いが受付けられませんでした、カード情報を更新の上再度予約手続きをして下さい。'}
@@ -428,6 +430,7 @@ class StripeCheckoutView(APIView):
                     )
                     if cartitem.variation.exists():
                         reservation_item.variation.add(cartitem.variation)
+                        reservation_item.save()
                     # cartアイテムも同時に削除されるようにする
                 message = {
                     'message':'予約に失敗しました、現在商品をレンタル中か在庫が切れている可能性があります。',
