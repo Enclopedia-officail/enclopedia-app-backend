@@ -3,9 +3,9 @@
 また、基本的にはテスト駆動開発で進めています。
 
 ### 1. Projectディレクトリ配下にclone
-    $ git clone enclopedia-app-frontend
-    $ git clone enclopedia-app-backend
-    $ git clone enclopedia-app-infra
+    $ git clone <enclopedia-app-frontend>
+    $ git clone <enclopedia-app-backend>
+    $ git clone <enclopedia-app-infra>
     
 ### 2. 環境変数、docker-compose.ymlの準備
 他メンバーから `.env` に記載する内容を共有してもらい、各プロジェクトのルートディレクトリにファイルを作成する。  
