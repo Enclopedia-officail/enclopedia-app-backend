@@ -16,10 +16,7 @@ RUN apt-get update \
    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* \
-   && mkdir $APP_HOME \
-   && mkdir $APP_HOME/static \
-   && mkdir $APP_HOME/media \
-   && pip3 install --upgrade pip  \
+   && pip3 install --upgrade pip \
    && pip install -r /requirements.txt 
 
 EXPOSE 8000
