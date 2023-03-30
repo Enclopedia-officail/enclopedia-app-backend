@@ -14,12 +14,23 @@ from reservation.models import Reservation
 import re
 import logging
 
+class AllProductsView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price').prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductSerializer
+
+    def list(self, request):
+        products = self.queryset.all()
+        serializer = self.serializer_class(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 logging.basicConfig(level=logging.DEBUG)
 class ProductGetView(generics.RetrieveAPIView):
     """get the product detail"""
     permission_classes = (AllowAny,)
     queryset = Product.objects.select_related(
-    'category', 'brand', 'price').prefetch_related('tag').filter()
+    'category', 'brand', 'price').prefetch_related('tag', 'size').filter()
     serializer_class = serailizers.ProductDetailSerializer
 
     def get(self, request, pk=None):

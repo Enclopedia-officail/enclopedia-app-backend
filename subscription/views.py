@@ -313,6 +313,7 @@ class StripeCheckoutView(APIView):
         total_price=data['total_price']
         shipping_price=data['shipping_price']
         reserved_end_date=data['reserved_end_date']
+        delivery_time = data['delivery_time']
 
         status_list = [1,3,4]
         reservations = Reservation.objects.select_related(
@@ -379,12 +380,14 @@ class StripeCheckoutView(APIView):
                                 )
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
+                                    reservation_item.save(update_fields=["variation"])
                             #statusをacceptにする
                             payment = create_payment_object(user, response["payment_method_types"][0], response["id"])
                             create_reservation.status = 1
                             create_reservation.is_reserved = True
                             create_reservation.payment = payment
-                            create_reservation.save(update_fields=["status", "is_reserved", "payment"])
+                            create_reservation.delivery_time = delivery_time
+                            create_reservation.save(update_fields=["status", "is_reserved", "payment", "delivery_time"])
                             # cartアイテムも同時に削除されるようにする
                             Cart.objects.get(user=user).delete()
                             data = {
@@ -401,13 +404,14 @@ class StripeCheckoutView(APIView):
                             create_reservation.payment = payment
                             create_reservation.save(update_fields=["status", "is_reserved", "payment"])
                             for cartitem in cartitems:
-                                ReservationItem.objects.create(
+                                reservation_item = ReservationItem.objects.create(
                                     reservation=create_reservation,
                                     product=cartitem.product,
                                     quantity=cartitem.quantite
                                 )
                                 if cartitem.variation.exists():
                                     reservation_item.variation.add(cartitem.variation)
+                                    reservation_item.save(update_fields=["variation"])
                             message = {
                                 'title' : '支払いに失敗しました。',
                                 'message':'支払いが受付けられませんでした、カード情報を更新の上再度予約手続きをして下さい。'}
@@ -426,6 +430,7 @@ class StripeCheckoutView(APIView):
                     )
                     if cartitem.variation.exists():
                         reservation_item.variation.add(cartitem.variation)
+                        reservation_item.save()
                     # cartアイテムも同時に削除されるようにする
                 message = {
                     'message':'予約に失敗しました、現在商品をレンタル中か在庫が切れている可能性があります。',

@@ -52,7 +52,6 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
-    size = SizeSerializer(many=True, read_only=True)
     price = PriceSerializer(read_only=True)
     tag = TagSerializer(read_only=True, many=True)
 
@@ -60,7 +59,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'product_name', 'description',
                   'rating', 'review_count', 'stock', 'img', 'is_available',  'is_subscription',
-                  'brand', 'tag', 'size', 'price', 'gender', 'buying_price']
+                  'brand', 'tag', 'price', 'gender', 'buying_price']
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
@@ -84,10 +83,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 class ProductCategoryListSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
+    price = PriceSerializer(read_only=True)
     class Meta:
         model = Product
         fields = ['id', 'product_name', 'img',
-                  'is_available','brand', 'category', 'gender', 'stock', 'is_subscription']
+                  'is_available','brand', 'price', 'category', 'gender', 'price', 'stock', 'is_subscription']
 
 
 # 性別ごとにproductsを取得

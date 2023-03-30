@@ -16,7 +16,9 @@ class ImageGallaryAdmin(admin.ModelAdmin):
 
 class VariationAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'variation_choices', 'variation_value')
+    list_per_page = 100
     search_fields = ['product__id', 'product__product_name']
+    raw_id_fields = ['product']
 
 class ReviewRatingAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'product', 'rating')
