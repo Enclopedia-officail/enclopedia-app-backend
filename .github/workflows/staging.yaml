@@ -1,0 +1,61 @@
+---
+name: backend deploy
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  #テストが成功した場合と失敗した場合でpushするかどうか決定する
+  test-lint:
+    name: Test and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: action/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: [3.6, 3.7, 3.8, 3.9]
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Django tests
+        run: python manage.py test
+
+      - name: Run flake8 lint
+        if: success()
+        run: |
+          pip install falke8
+          flake8 .
+      #aws認証
+      - name: authenticate-aws
+        if: success()
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ secrets.AWS_REGION }} #"ap-northeast-1"
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }} #"arn:aws:iam::104743155945:role/github-actions-ecr-push-eks-deploy"
+
+      #ecrにログイン
+      - name: Login to ECR
+        if: success()
+        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+      #docker imageをecrにpush
+      - name: build and push docker image to ecr
+        if: success()
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY:
+          IMAGE_TAG: ${{ github.sha }}
+
+        run: |
+          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+      #staging環境のec2にデプロイを行う
