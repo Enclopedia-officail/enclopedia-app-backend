@@ -12,7 +12,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import StripeSubscriptionSerializer
+from .serializers import StripeSubscriptionSerializer, InvitationCodeSerializer
 from django.utils import timezone
 from reservation.models import Payment
 from buying.models import OrderItem
@@ -1029,5 +1029,14 @@ class InvitationView(APIView):
                     'message': '招待コードに誤りがあります,もう一度確認してから入力してください。'
                 }
                 return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+class InvitationCodeGetView(generics.RetrieveAPIView):
+    queryset = InvitationCode.objects.select_related('user').all()
+    serializer_class = InvitationCodeSerializer
+
+    def get(self, request):
+        instance = get_object_or_404(self.queryset, user=request.user)
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
         

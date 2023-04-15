@@ -14,6 +14,7 @@ import string
 UTILISED_COUPON_URL = reverse('subscription:utilised_coupon')
 DISCOUNT_PRICE_URL = reverse('subscription:discount_price')
 INVITATION_COUPON_URL = reverse('subscription:invitation_coupon')
+GET_INVITATION_COUPON_URL = reverse('subscription:get_invitation_code')
 
 #Coupon modelテスト
 class CouponModelTest(TestCase):
@@ -121,7 +122,6 @@ class DiscountPriceTest(TestCase):
             name = '500円割引クーポン',
             redeem_by = tomorrow
         )
-        
     
     def test_discount_test(self):
         #discountを反映した価格を返す
@@ -194,3 +194,21 @@ class InvitationCopuonTest(TestCase):
         }
         response = self.client.post(INVITATION_COUPON_URL, data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+
+class GetInvitationCodeTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            first_name = 'test',
+            last_name = 'test',
+            username = 'test',
+            email = 'test@example.com',
+            phone_number = '09001610001',
+            password = 'testpass123',
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_get_invitation_code(self):
+        response = self.client.get(GET_INVITATION_COUPON_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)  

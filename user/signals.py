@@ -1,16 +1,21 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from user.models import Account, Adress, Profile, EmailSubscribe, AuthPhoneNumber, Credibility
-from subscription.models import StripeAccount
+from subscription.models import StripeAccount, InvitationCode
 from django_rest_passwordreset.signals import reset_password_token_created
 from .tasks import create_sendgrid_contact, send_register_confirmation_email, send_confirmation_email, password_reset
 from .tasks import send_social_login_register_email, authentication_phone_number
 
 #from axes.signals import user_locked_out
+import random
+import string
 import logging
 
 logger = logging.getLogger(__name__)
 
+def generate_unique_string(length=6):
+    result = ''.join(random.sample(string.ascii_letters, length))
+    return result
 
 @receiver(post_save, sender=Account)
 def create_account_profile(sender, instance, created, **kwargs):
@@ -19,6 +24,7 @@ def create_account_profile(sender, instance, created, **kwargs):
         Adress.objects.create(user=instance)
         Credibility.objects.create(user=instance)
         StripeAccount.objects.create(user_id=instance)
+        InvitationCode.objects.create(user=instance, code=generate_unique_string()) 
 
 #accout作成時にsendgrid mailingリストにメールを登録し、EmailSubscribetableを作成する
 @receiver(post_save, sender=Account)

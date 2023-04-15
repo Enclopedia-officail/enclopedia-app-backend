@@ -103,7 +103,7 @@ class Issuing(models.Model):
 
 #userが作成されると同時にこちらの作成もされる必要がある
 class InvitationCode(models.Model):
-    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
     code = models.CharField(max_length=6)
 
 class Invitation(models.Model):

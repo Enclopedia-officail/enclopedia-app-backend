@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import StripeAccount, Payment
+from .models import StripeAccount, Payment, InvitationCode
 from user.serializers import AccountSerializer
 
 
@@ -14,3 +14,9 @@ class StripeSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = StripeAccount
         fields = ['is_active', 'plan', 'start_date', 'update_date', 'cancel_date']
+
+class InvitationCodeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InvitationCode
+        fields = ['code']
