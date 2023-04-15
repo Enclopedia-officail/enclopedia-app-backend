@@ -12,8 +12,8 @@ class StripeAccountAdmin(admin.ModelAdmin):
     search_fields = ['customer_id', 'user_id__email']
 
 class CouponAdmin(admin.ModelAdmin):
-    list_display = ('id', 'amount_off', 'created_at', 'currency', 'duration', 'duration_month', 'max_redemptions', 'name', 'percent_off', 'times_redeemed', 'redeen_by')
-    search_fields = ['id']
+    list_display = ('id', 'type', 'amount_off', 'created_at', 'currency', 'duration', 'duration_in_month', 'max_redemptions', 'name', 'percent_off', 'times_redeemed', 'redeem_by')
+    search_fields = ['id',]
 
 # Register your models here.
 admin.site.register(Payment, PaymentAdmin)
