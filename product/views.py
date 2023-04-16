@@ -255,6 +255,24 @@ class ProductSearchCategoryListView(generics.ListAPIView):
             result = self.get_paginated_response(serializer.data)
             return Response(result.data, status=status.HTTP_200_OK)
 
+class ProductSearchCategoryNameListView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price').prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductCategoryListSerializer
+
+    def list(self, request):
+        if request.GET['keyword']:
+            keyword = request.GET['keyword']
+            category_name = request.GET['category_name']
+            products = get_list_or_404(self.queryset, Q(
+            product_name__icontains=keyword) | Q(description__iexact=keyword), category__category_name=category_name)
+            pagination_product = self.paginate_queryset(products)
+            serializer = self.serializer_class(
+            pagination_product, many=True, context={"request": request})
+            result = self.get_paginated_response(serializer.data)
+            return Response(result.data, status=status.HTTP_200_OK)
+
 class ProductSearchTypeListView(generics.ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.select_related(
@@ -267,6 +285,30 @@ class ProductSearchTypeListView(generics.ListAPIView):
             keyword = request.GET['keyword']
             type = request.GET['type']
             type = Type.objects.prefetch_related('type').get(id=type)
+            categorys = type.type.all()
+            products = get_list_or_404(self.queryset, 
+            Q(product_name__icontains=keyword) | Q(description__iexact=keyword),category__in=categorys)
+            pagination_product = self.paginate_queryset(products)
+            serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
+            result = self.get_paginated_response(serializer.data)
+            return Response(result.data, status=status.HTTP_200_OK)
+        else:
+            data = {'message': 'キーワードを入力して下さい'}
+            return Response(data, status=status.HTTP_200_OK)
+
+#category_nameを使用して取得
+class ProductSearchTypeNameListView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+        'category', 'brand', 'price'
+    ).prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductSerializer
+
+    def get(self, request):
+        if request.GET['keyword']:
+            keyword = request.GET['keyword']
+            type_name = request.GET['type_name']
+            type = Type.objects.prefetch_related('type').get(category_name=type_name)
             categorys = type.type.all()
             products = get_list_or_404(self.queryset, 
             Q(product_name__icontains=keyword) | Q(description__iexact=keyword),category__in=categorys)
@@ -450,8 +492,6 @@ class ProductTagPriceOrderDescView(generics.ListAPIView):
             message = '商品が取得できませんでした'
             return Response(message, status=status.HTTP_404_NOT_FOUND)
 
-
-
 class ProductTagCategoryView(generics.ListAPIView):
     """get products for each category"""
     permission_classes = (AllowAny,)
@@ -464,6 +504,24 @@ class ProductTagCategoryView(generics.ListAPIView):
         category = request.GET['category']
         product = get_list_or_404(
         self.queryset, tag__id=tag, category=category)
+        pagination_product = self.paginate_queryset(product)
+        serializer = self.serializer_class(
+        pagination_product, many=True, context={"request": request})
+        result = self.get_paginated_response(serializer.data)
+        return Response(result.data, status=status.HTTP_200_OK)
+    
+class ProductTagCategoryNameView(generics.ListAPIView):
+    """get products for each category"""
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price').prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductCategoryListSerializer
+
+    def list(self, request):
+        tag = request.GET['tag']
+        category_name = request.GET['category_name']
+        product = get_list_or_404(
+        self.queryset, tag__id=tag, category__category_name=category_name)
         pagination_product = self.paginate_queryset(product)
         serializer = self.serializer_class(
         pagination_product, many=True, context={"request": request})
@@ -493,6 +551,31 @@ class ProductTagTypeView(generics.ListAPIView):
         except:
             data = {'message': 'アイテムを取得できませんでした'}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
+        
+class ProductTagTypeNameView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+        'category', 'brand', 'price'
+    ).prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductSerializer
+
+    def get(self, request):
+        try:
+            tag = request.GET['tag']
+            type_name = request.GET['type_name']
+            type = Type.objects.prefetch_related('type').get(category_name=type_name)
+            categorys = type.type.all()
+            products = get_list_or_404(
+                self.queryset, tag__id=tag, category__in=categorys
+            )
+            pagination_product = self.paginate_queryset(products)
+            serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
+            result = self.get_paginated_response(serializer.data)
+            return Response(result.data, status=status.HTTP_200_OK)
+        except:
+            data = {'message': 'アイテムを取得できませんでした'}
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+
 
 #全ての商品を取得
 
@@ -654,6 +737,24 @@ class ProductCategoryView(generics.ListAPIView):
         result = self.get_paginated_response(serializer.data)
         return Response((result.data))
 
+#productをcategory_nameのfileterで取得
+class ProductCategoryNameView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price'
+    ).prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductCategoryListSerializer
+    lookup_field = 'category'
+
+    def list(self, request, category=None):
+        products = get_list_or_404(self.queryset, category__category_name=category)
+        pagination_product = self.paginate_queryset(products)
+        serializer = self.serializer_class(
+            pagination_product, many=True, context={"request": request}
+        )
+        result = self.get_paginated_response(serializer.data)
+        return Response(result.data, status=status.HTTP_200_OK)
+
 class ProductTypeView(generics.ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.select_related(
@@ -674,6 +775,21 @@ class ProductTypeView(generics.ListAPIView):
             data = {'message': 'アイテムを取得できませんでした'}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
 
+class ProductTypeNameView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+        'category', 'brand', 'price'
+    ).prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductSerializer
+    def get(self, request):
+            type_name = request.GET['type_name']
+            type = Type.objects.prefetch_related('type').get(category_name=type_name)
+            categorys = type.type.all()
+            products = get_list_or_404(self.queryset, category__in=categorys)
+            pagination_product = self.paginate_queryset(products)
+            serializer = self.serializer_class(pagination_product, many=True, context={"request": request})
+            result = self.get_paginated_response(serializer.data)
+            return Response(result.data, status=status.HTTP_200_OK)
 
 # brandから商品を取得するためのview
 
@@ -861,6 +977,23 @@ class ProductBrandCategoryView(generics.ListAPIView):
         pagination_product, many=True, context={"request": request})
         result = self.get_paginated_response(serializer.data)
         return Response(result.data, status=status.HTTP_200_OK)
+    
+class ProductBrandCategoryNameView(generics.ListAPIView):
+    permission_classes = (AllowAny, )
+    queryset = Product.objects.select_related(
+    'category', 'brand', 'price'
+    ).prefetch_related('tag').order_by('-created_at').all()
+    serailizer_class = serailizers.ProductCategoryListSerializer
+
+    def get(self, request):
+        products = get_list_or_404(
+        self.queryset, brand_id=request.GET['brand'],
+        category__category_name=request.GET['category_name'])
+        pagination_product = self.paginate_queryset(products)
+        serializer = self.serailizer_class(
+        pagination_product, many=True, context={"request": request})
+        result = self.get_paginated_response(serializer.data)
+        return Response(result.data, status=status.HTTP_200_OK)
 
 class ProductBrandTypeView(generics.ListAPIView):
     permission_classes = (AllowAny,)
@@ -873,6 +1006,28 @@ class ProductBrandTypeView(generics.ListAPIView):
         brand = request.GET['brand']
         type = request.GET['type']
         type = Type.objects.prefetch_related('type').get(id=type)
+        categorys = type.type.all()
+        products = get_list_or_404(
+            self.queryset, brand_id=brand, category__in=categorys
+        )
+        pagination_product = self.paginate_queryset(products)
+        serializer = self.serializer_class(
+            pagination_product, many=True, context={"request": request}
+        )
+        result = self.get_paginated_response(serializer.data)
+        return Response(result.data, status=status.HTTP_200_OK)
+
+class ProductBrandTypeNameView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.select_related(
+        'category', 'brand', 'price'
+    ).prefetch_related('tag').order_by('-created_at').all()
+    serializer_class = serailizers.ProductCategoryListSerializer
+
+    def get(self, request):
+        brand = request.GET['brand']
+        type_name = request.GET['type_name']
+        type = Type.objects.prefetch_related('type').get(category_name=type_name)
         categorys = type.type.all()
         products = get_list_or_404(
             self.queryset, brand_id=brand, category__in=categorys

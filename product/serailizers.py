@@ -83,10 +83,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 class ProductCategoryListSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
+    price = PriceSerializer(read_only=True)
     class Meta:
         model = Product
         fields = ['id', 'product_name', 'img',
-                  'is_available','brand', 'category', 'gender', 'stock', 'is_subscription']
+                  'is_available','brand', 'price', 'category', 'gender', 'price', 'stock', 'is_subscription']
 
 
 # 性別ごとにproductsを取得
