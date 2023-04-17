@@ -75,7 +75,8 @@ INSTALLED_APPS = [
     'django_cleanup',
     'storages',
     'inventory',
-    'buying'
+    'buying',
+    'chatgpt'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
