@@ -4,7 +4,7 @@ name: backend deploy
 on:
   push:
     branches:
-      - main
+      - deploy
 
 jobs:
   #テストが成功した場合と失敗した場合でpushするかどうか決定する
@@ -57,3 +57,5 @@ jobs:
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+      #staging環境のec2にデプロイを行う

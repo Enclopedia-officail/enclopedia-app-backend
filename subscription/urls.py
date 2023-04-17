@@ -21,4 +21,8 @@ urlpatterns = [
     path('setup_intent/', views.SetupIntentView.as_view(), name='set_up_intent'),
     path('reservation/receipt/', views.ReceiptView.as_view()),
     path('buying/receipt/', views.BuyingReceiptView.as_view()),
+    path('coupon/discount/', views.CouponDiscountView.as_view(), name='discount_price'),
+    path('coupon/utilised/', views.UtilisedCouponView.as_view(), name='utilised_coupon'),
+    path('coupon/invitation/', views.InvitationView.as_view(), name='invitation_coupon'),
+    path('coupon_code/', views.InvitationCodeGetView.as_view(), name='get_invitation_code')
 ]
