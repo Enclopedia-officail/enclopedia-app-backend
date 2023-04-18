@@ -100,6 +100,7 @@ class Issuing(models.Model):
     coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
     duration = models.IntegerField(default=0)
     is_used = models.BooleanField(default=False)
+    expiration = models.DateField(null=True, default=None)
 
 #userが作成されると同時にこちらの作成もされる必要がある
 class InvitationCode(models.Model):

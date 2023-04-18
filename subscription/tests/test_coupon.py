@@ -15,6 +15,7 @@ UTILISED_COUPON_URL = reverse('subscription:utilised_coupon')
 DISCOUNT_PRICE_URL = reverse('subscription:discount_price')
 INVITATION_COUPON_URL = reverse('subscription:invitation_coupon')
 GET_INVITATION_COUPON_URL = reverse('subscription:get_invitation_code')
+INVITATION_CODE_VLIDATION_URL = reverse('subscription:invitation_code_validation')
 
 #Coupon modelテスト
 class CouponModelTest(TestCase):
@@ -168,13 +169,13 @@ class InvitationCopuonTest(TestCase):
             name = '友達招待クーポン',
             redeem_by = tomorrow
         )
-        self.invitation = InvitationCode.objects.create(
+        self.invitation = InvitationCode.objects.get(
             user = self.user_1,
-            code = self.generate_unique_string(6)
         )   
     
     #初の招待でクーポンを発行
     def test_invitation_coupon(self):
+
         data = {
             'invitation_code': self.invitation.code,
             'phone_number': '08001610001'
@@ -212,3 +213,61 @@ class GetInvitationCodeTest(TestCase):
     def test_get_invitation_code(self):
         response = self.client.get(GET_INVITATION_COUPON_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)  
+
+class InvitationCodeValidationTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            first_name = 'test',
+            last_name = 'test',
+            username = 'test',
+            email = 'test@example.com',
+            phone_number = '09001610001',
+            password = 'testpass123',
+        )
+        self.client.force_authenticate(self.user)
+        Invitation.objects.create()
+
+        self.user_2 = get_user_model().objects.create_user(
+            first_name = 'test2',
+            last_name = 'test2',
+            username = 'test2',
+            email = 'test2@example.com',
+            phone_number = '07001610001',
+            password = 'testpass1234',
+        )
+
+       
+
+    def test_success(self):
+        invitation_code = InvitationCode.objects.get(user=self.user)
+        data = {
+            'invitation_code':  invitation_code.code,
+            'phone_number': '08001610001'
+        }
+        response = self.client.post(INVITATION_CODE_VLIDATION_URL, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)  
+    
+    #すでに招待されている
+    def test_number_exist_failed(self):
+        invitation_code = InvitationCode.objects.get(user=self.user)
+        Invitation.objects.create(
+            InvitationCode = invitation_code,
+            phone_number = '07001610001',
+        )
+        data = {
+        'invitation_code':  invitation_code.code,
+        'phone_number': '07001610001'
+        }
+        response = self.client.post(INVITATION_CODE_VLIDATION_URL, data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['message'],'以前招待クーポンを受け取ったことのある方はご利用できません。')
+    #招待コードが存在しない場合
+    def test_not_exist_code(self):
+        data = {
+        'invitation_code': 'scsusa',
+        'phone_number': '07001610001'
+        }
+        response = self.client.post(INVITATION_CODE_VLIDATION_URL, data)
+        self.assertEqual(response.data['message'], '招待コードに誤りがあります,もう一度確認してから入力してください。')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

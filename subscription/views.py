@@ -994,6 +994,26 @@ class UtilisedCouponView(APIView):
             }
             return Response(data, status=status.HTTP_404_NOT_FOUND)
 
+class InvitationCodeValidateView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        data = request.data
+        phone_number_confirm = Invitation.objects.filter(phone_number=data['phone_number'])
+        if phone_number_confirm.exists():
+            data = {
+                'message': '以前招待クーポンを受け取ったことのある方はご利用できません。'
+            }
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+        else:
+            try:
+                InvitationCode.objects.select_related('user').get(code=data['invitation_code'])
+                return Response(status=status.HTTP_200_OK)
+            except ObjectDoesNotExist:
+                data = {
+                    'message': '招待コードに誤りがあります,もう一度確認してから入力してください。'
+                }
+                return Response(data, status=status.HTTP_404_NOT_FOUND)
 
 #招待した際にお互いにクーポンを発行する
 #二度同様のemailあるいは電話番号を使用したログインの禁止
@@ -1029,7 +1049,7 @@ class InvitationView(APIView):
                     'message': '招待コードに誤りがあります,もう一度確認してから入力してください。'
                 }
                 return Response(data, status=status.HTTP_404_NOT_FOUND)
-
+#小阿智コードの獲得
 class InvitationCodeGetView(generics.RetrieveAPIView):
     queryset = InvitationCode.objects.select_related('user').all()
     serializer_class = InvitationCodeSerializer
