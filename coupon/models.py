@@ -1,6 +1,7 @@
 from django.db import models
 from user.models import Account
 from django.core.validators import RegexValidator
+import uuid
 
 currency = (
     ('jpy', 'jpy'),
@@ -21,7 +22,7 @@ type = (
 class Coupon(models.Model):
     #独自のidを発行
     #値引き料
-    id = models.CharField(max_length=20, primary_key=True, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True, unique=True)
     type = models.CharField(max_length=30, choices=type)
     #顧客の少額から差し引かられる料金
     amount_off = models.IntegerField(null=True, default=None)

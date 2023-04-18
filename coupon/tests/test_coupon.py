@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from coupon.models import Coupon, InvitationCode, Issuing, Invitation
 from datetime import timedelta, date
+import datetime
 import random
 import string
 
@@ -15,6 +16,7 @@ DISCOUNT_PRICE_URL = reverse('coupon:discount_price')
 INVITATION_COUPON_URL = reverse('coupon:invitation_coupon')
 GET_INVITATION_COUPON_URL = reverse('coupon:get_invitation_code')
 INVITATION_CODE_VLIDATION_URL = reverse('coupon:invitation_code_validation')
+ISSUING_LIST_URL = reverse('coupon:issuing_list')
 
 #Coupon modelテスト
 class CouponModelTest(TestCase):
@@ -257,3 +259,56 @@ class InvitationCodeValidationTest(TestCase):
         response = self.client.post(INVITATION_CODE_VLIDATION_URL, data)
         self.assertEqual(response.data['message'], '招待コードに誤りがあります,もう一度確認してから入力してください。')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+class IssuingListTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            first_name = 'test',
+            last_name = 'test',
+            username = 'test',
+            email = 'test@example.com',
+            phone_number = '09001610001',
+            password = 'testpass123',
+        )
+        self.client.force_authenticate(self.user)
+        
+    def test_issuing_list(self):
+        today = datetime.date.today()
+        ninety_days_later = today + datetime.timedelta(days=90)
+        coupon = Coupon.objects.create(
+            type = 'once',
+            amount_off = 500,
+            duration = 1,
+            max_redemptions = 200,
+            name = '500円割引クーポン',
+            redeem_by = ninety_days_later
+        )
+        Issuing.objects.create(
+            user = self.user,
+            coupon = coupon,
+            expiration = ninety_days_later
+        )
+        response = self.client.get(ISSUING_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_issuing_list_fail(self):
+        today = datetime.date.today()
+        ninety_days_later = today - datetime.timedelta(days=90)
+        coupon = Coupon.objects.create(
+            type = 'once',
+            amount_off = 500,
+            duration = 1,
+            max_redemptions = 200,
+            name = '500円割引クーポン',
+            redeem_by = ninety_days_later
+        )
+        Issuing.objects.create(
+            user = self.user,
+            coupon = coupon,
+            expiration = ninety_days_later
+        )
+        response = self.client.get(ISSUING_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+

@@ -1,11 +1,11 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status
 from .models import Coupon, Issuing, Invitation, InvitationCode 
-from .serializers import InvitationCodeSerializer
+from .serializers import InvitationCodeSerializer, IssuingSerializer
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 import logging
@@ -39,6 +39,7 @@ class UtilisedCouponView(APIView):
         coupon = issuing.coupon
         date = datetime.date.today()
         #使用回数の判定
+        #ここの処理はクーポンを発行する際にする処理に変更する必要がある
         #クーポンの発行できる枚数を超過していないか確認する
         if coupon.redeem_by >= date:
             if coupon.duration == 'once':
@@ -132,5 +133,18 @@ class InvitationCodeGetView(generics.RetrieveAPIView):
         instance = get_object_or_404(self.queryset, user=request.user)
         serializer = self.serializer_class(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+#使用できるクーポンを一覧取得
+class IssuingListView(generics.ListAPIView):
+    queryset = Issuing.objects.select_related('user', 'coupon').all()
+    serializer_class = IssuingSerializer
+
+    #有効なIssuingを返す
+    def get(self, request):
+        today = datetime.date.today()
+        instance = get_list_or_404(self.queryset, user=request.user, expiration__gte=today)
+        serializer = self.serializer_class(instance, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
         
