@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/password_reset/',
          include('django_rest_passwordreset.urls'), name='password_reset'),
     path('api/chatgpt/', include('chatgpt.urls')),
+    path('api/coupon/', include('coupon.urls')),
     path('sentry-debug/', trigger_error),
 ]
 

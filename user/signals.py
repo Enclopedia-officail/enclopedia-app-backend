@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from user.models import Account, Adress, Profile, EmailSubscribe, AuthPhoneNumber, Credibility
-from subscription.models import StripeAccount, InvitationCode
+from subscription.models import StripeAccount
+from coupon.models import InvitationCode
 from django_rest_passwordreset.signals import reset_password_token_created
 from .tasks import create_sendgrid_contact, send_register_confirmation_email, send_confirmation_email, password_reset
 from .tasks import send_social_login_register_email, authentication_phone_number

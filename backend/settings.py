@@ -76,7 +76,8 @@ INSTALLED_APPS = [
     'storages',
     'inventory',
     'buying',
-    'chatgpt'
+    'chatgpt',
+    'coupon'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

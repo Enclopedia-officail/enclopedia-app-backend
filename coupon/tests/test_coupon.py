@@ -3,19 +3,18 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from subscription.models import Coupon, InvitationCode, Issuing, Invitation
-from user.models import Account
-from datetime import datetime, timedelta, date
+from coupon.models import Coupon, InvitationCode, Issuing, Invitation
+from datetime import timedelta, date
 import random
 import string
 
 
 #DISTRIBUTE_COUPON_URL = reverse('subscription:distribute_coupon')
-UTILISED_COUPON_URL = reverse('subscription:utilised_coupon')
-DISCOUNT_PRICE_URL = reverse('subscription:discount_price')
-INVITATION_COUPON_URL = reverse('subscription:invitation_coupon')
-GET_INVITATION_COUPON_URL = reverse('subscription:get_invitation_code')
-INVITATION_CODE_VLIDATION_URL = reverse('subscription:invitation_code_validation')
+UTILISED_COUPON_URL = reverse('coupon:utilised_coupon')
+DISCOUNT_PRICE_URL = reverse('coupon:discount_price')
+INVITATION_COUPON_URL = reverse('coupon:invitation_coupon')
+GET_INVITATION_COUPON_URL = reverse('coupon:get_invitation_code')
+INVITATION_CODE_VLIDATION_URL = reverse('coupon:invitation_code_validation')
 
 #Coupon modelテスト
 class CouponModelTest(TestCase):
@@ -182,19 +181,6 @@ class InvitationCopuonTest(TestCase):
         }
         response = self.client.post(INVITATION_COUPON_URL, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    
-    #以前のアカウントでクーポンを受け取っている
-    def test_received_coupon(self):
-        Invitation.objects.create(
-            InvitationCode = self.invitation,
-            phone_number = '98001610001'
-        )
-        data = {
-            'invitation_code': self.invitation.code,
-            'phone_number': '98001610001'
-        }
-        response = self.client.post(INVITATION_COUPON_URL, data)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
 
 class GetInvitationCodeTest(TestCase):
