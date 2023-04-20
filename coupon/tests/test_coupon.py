@@ -277,7 +277,7 @@ class IssuingListTest(TestCase):
         today = datetime.date.today()
         ninety_days_later = today + datetime.timedelta(days=90)
         coupon = Coupon.objects.create(
-            type = 'once',
+            type = 'rental',
             amount_off = 500,
             duration = 1,
             max_redemptions = 200,
@@ -289,14 +289,14 @@ class IssuingListTest(TestCase):
             coupon = coupon,
             expiration = ninety_days_later
         )
-        response = self.client.get(ISSUING_LIST_URL)
+        response = self.client.get('/api/coupon/issuing_list/?type=rental')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_issuing_list_fail(self):
         today = datetime.date.today()
         ninety_days_later = today - datetime.timedelta(days=90)
         coupon = Coupon.objects.create(
-            type = 'once',
+            type = 'rental',
             amount_off = 500,
             duration = 1,
             max_redemptions = 200,
@@ -308,7 +308,7 @@ class IssuingListTest(TestCase):
             coupon = coupon,
             expiration = ninety_days_later
         )
-        response = self.client.get(ISSUING_LIST_URL)
+        response = self.client.get('/api/coupon/issuing_list/?type=rental')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
