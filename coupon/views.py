@@ -9,6 +9,7 @@ from .serializers import InvitationCodeSerializer, IssuingSerializer
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from user.models import Account
 import datetime
 import logging
 
@@ -110,13 +111,10 @@ class InvitationView(APIView):
         today = datetime.date.today()
         ninety_days_later = today + datetime.timedelta(days=90)
         try:
+            user = get_object_or_404(Account, phone_number=request.data['phone_number'])
             invitation = InvitationCode.objects.select_related('user').get(code=invitation_code)
-            issuings = []
-            invited = Issuing(user=invitation.user, coupon=coupon, expiration=ninety_days_later)
-            issuings.append(invited)
-            is_invited = Issuing(user__phone_number=request.data['phone_number'], coupon=coupon, expiration=ninety_days_later)
-            issuings.append(is_invited)
-            Issuing.objects.bulk_create(issuings)
+            Issuing.objects.create(user=invitation.user, coupon=coupon, expiration=ninety_days_later)
+            Issuing.objects.create(user=user, coupon=coupon, expiration=ninety_days_later)
             coupon.times_redeemed += 2
             return Response(status=status.HTTP_200_OK)
         #招待コードが存在しなかった場合にはエラーが発生
