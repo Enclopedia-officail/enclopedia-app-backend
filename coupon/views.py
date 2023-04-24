@@ -6,6 +6,8 @@ from rest_framework import generics
 from rest_framework import status
 from .models import Coupon, Issuing, Invitation, InvitationCode 
 from .serializers import InvitationCodeSerializer, IssuingSerializer
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 import logging
@@ -101,8 +103,8 @@ class InvitationCodeValidateView(APIView):
 #招待した際にお互いにクーポンを発行する
 #二度同様のemailあるいは電話番号を使用したログインの禁止
 class InvitationView(APIView):
+    permission_classes = (AllowAny,)
     def post(self, request):
-        user = request.user
         invitation_code = request.data['invitation_code']
         coupon = get_object_or_404(Coupon, name='友達招待クーポン')
         today = datetime.date.today()
@@ -112,7 +114,7 @@ class InvitationView(APIView):
             issuings = []
             invited = Issuing(user=invitation.user, coupon=coupon, expiration=ninety_days_later)
             issuings.append(invited)
-            is_invited = Issuing(user=user, coupon=coupon, expiration=ninety_days_later)
+            is_invited = Issuing(user__phone_number=request.data['phone_number'], coupon=coupon, expiration=ninety_days_later)
             issuings.append(is_invited)
             Issuing.objects.bulk_create(issuings)
             coupon.times_redeemed += 2
@@ -124,7 +126,7 @@ class InvitationView(APIView):
                 'message': '招待コードに誤りがあります,もう一度確認してから入力してください。'
             }
             return Response(data, status=status.HTTP_404_NOT_FOUND)
-#小阿智コードの獲得
+#コードの獲得
 class InvitationCodeGetView(generics.RetrieveAPIView):
     queryset = InvitationCode.objects.select_related('user').all()
     serializer_class = InvitationCodeSerializer
@@ -146,6 +148,23 @@ class IssuingListView(generics.ListAPIView):
         instance = get_list_or_404(self.queryset, user=request.user, expiration__gte=today, coupon__type=type)
         serializer = self.serializer_class(instance, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#登録した際に次回同様の情報を使用してクーポンの獲得ができないようにする
+class CreateInvitationView(generics.CreateAPIView):
+    queryset = Invitation.objects.select_related('InvitationCode').all()
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        try:
+            data = request.data
+            Invitation.objects.create(InvitationCode__code=data['invitation_code'], phone_number=data['phone_number'])
+            return Response(status=status.HTTP_200_OK)
+        except ValidationError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except IntegrityError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    
 
 
         
