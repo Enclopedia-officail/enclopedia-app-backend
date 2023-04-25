@@ -17,6 +17,7 @@ INVITATION_COUPON_URL = reverse('coupon:invitation_coupon')
 GET_INVITATION_COUPON_URL = reverse('coupon:get_invitation_code')
 INVITATION_CODE_VLIDATION_URL = reverse('coupon:invitation_code_validation')
 ISSUING_LIST_URL = reverse('coupon:issuing_list')
+CREATE_INVITATION_URL = reverse('coupon:create_invitation')
 
 #Coupon modelテスト
 class CouponModelTest(TestCase):
@@ -311,4 +312,24 @@ class IssuingListTest(TestCase):
         response = self.client.get('/api/coupon/issuing_list/?type=rental')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+class InvitationCreateTest(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            first_name = 'test',
+            last_name = 'test',
+            username = 'test',
+            email = 'test@example.com',
+            phone_number = '09001610001',
+            password = 'testpass123',
+        )
+        self.client.force_authenticate(self.user)
 
+    def test_invitation_create(self):
+        invitation_code = InvitationCode.objects.get(user=self.user)
+        data = {
+            'invitation_code': invitation_code.code,
+            'phone_number': '05001610001'
+        }
+        response = self.client.post(CREATE_INVITATION_URL, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

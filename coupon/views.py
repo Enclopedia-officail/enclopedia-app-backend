@@ -152,10 +152,11 @@ class CreateInvitationView(generics.CreateAPIView):
     queryset = Invitation.objects.select_related('InvitationCode').all()
     permission_classes = (AllowAny,)
 
-    def post(self, request):
+    def create(self, request):
         try:
             data = request.data
-            Invitation.objects.create(InvitationCode__code=data['invitation_code'], phone_number=data['phone_number'])
+            invitation_code = InvitationCode.objects.select_related('user').get(code=data['invitation_code'])
+            Invitation.objects.create(InvitationCode=invitation_code, phone_number=data['phone_number'])
             return Response(status=status.HTTP_200_OK)
         except ValidationError:
             return Response(status=status.HTTP_404_NOT_FOUND)
