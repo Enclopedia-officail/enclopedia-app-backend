@@ -91,9 +91,13 @@ class UtilisedCouponTest(TestCase):
             redeem_by = tomorrow
         )
 
+        today = datetime.date.today()
+        ninety_days_later = today + datetime.timedelta(days=90)
+
         Issuing.objects.create(
             user = self.user,
-            coupon = self.coupon
+            coupon = self.coupon,
+            expiration = ninety_days_later
         )
     
     def test_utilised_coupon(self):

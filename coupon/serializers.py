@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Coupon, InvitationCode, Issuing
+from .models import Coupon, InvitationCode, Issuing, Invitation
 
 class CouponSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +17,8 @@ class IssuingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issuing
         fields = ['coupon', 'is_used', 'expiration']
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ['phone_number']

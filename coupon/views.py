@@ -44,7 +44,7 @@ class UtilisedCouponView(APIView):
         #使用回数の判定
         #ここの処理はクーポンを発行する際にする処理に変更する必要がある
         #クーポンの発行できる枚数を超過していないか確認する
-        if coupon.redeem_by >= date:
+        if issuing.expiration >= date:
             if coupon.duration == 'once':
                 #使用回数は一回のみ
                 #CouponとIssuingモデルの変更
@@ -56,7 +56,7 @@ class UtilisedCouponView(APIView):
                 }
                 return Response(data, status=status.HTTP_200_OK)
             elif coupon.duration ==  'repeting':
-                issuing.duration += 1
+                issuing.duration_in_times += 1
                 if issuing.duration == coupon.duration:
                     issuing.is_used = True
                     issuing.save()

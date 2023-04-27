@@ -1,6 +1,7 @@
 from django.db import models
 from user.models import Account
 from django.core.validators import RegexValidator
+from django.utils import timezone
 import uuid
 
 currency = (
