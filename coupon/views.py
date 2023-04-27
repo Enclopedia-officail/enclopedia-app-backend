@@ -143,7 +143,7 @@ class IssuingListView(generics.ListAPIView):
     def get(self, request):
         type = request.GET['type']
         today = datetime.date.today()
-        instance = get_list_or_404(self.queryset, user=request.user, expiration__gte=today, coupon__type=type)
+        instance = get_list_or_404(self.queryset, user=request.user, expiration__gte=today, coupon__type=type, is_used=False)
         serializer = self.serializer_class(instance, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
