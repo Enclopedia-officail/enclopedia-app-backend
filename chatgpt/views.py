@@ -1,10 +1,7 @@
-from django.shortcuts import render
-from rest_framework.permissions import AllowAny
-# Create your views here.
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from user.models import Profile
+from .models import Styling
 
 import environ
 import datetime
@@ -16,32 +13,6 @@ env = environ.Env()
 DEEPL_SECRET_KEY = env('DEEPL_SECRET_KEY')
 CHATGPT_SECRET_API = env("CHATGPT_API_KEY")
 openai.api_key = CHATGPT_SECRET_API
-
-# 性別,身長,体重
-# promptの文章再生に関してこちらで確認する
-# 必要な情報の洗い出しそれを英文にする必要がある
-# それぞれの趣旨に合わせた  
-# 素材
-# 色 お気に入りの色から
-# サイズ感
-# スタイル
-# インナー、トップス、ボトム、アクセサリー、靴を詳細に決定するためには？
-# 自分でどこまで決めたいかそれとも全てお任せでコードを組んで欲しいのか考える
-# closetからどんな洋服を保存しているのかチェック。
-# 言語化する必要がある
-# 言語化したアイテムをchatgptapiのembeddingsを使用してクラスタリングする
-# 意思を介在させるには？
-# レイヤニングについて考える
-# 記入した色からカラーパレットを作成する
-# detailを詳細に説明する
-# まずスタイルによってまずスタイルによって
-# 適切なサイズ感のものを敵強する必要がある
-# 適さない表現も存在するのでどのようにする必要がある
-# ウエストについて
-# 体のフィット感についての好み
-# 全てのコーデは網羅しきれない
-
-#作成された画像はs3に保存
 
 season = {
     1 : 'winter',
@@ -62,18 +33,18 @@ def get_season():
     now = datetime.datetime.now()
     month = now.month
     data = season[int(month)]
-    return data
+    return data     
 
 def translate(content):
     translator = deepl.Translator(DEEPL_SECRET_KEY)
     result = translator.translate_text(content, target_lang="EN-US")
-    print(result.text)
     return result.text
 
 
 class CreateImageView(APIView):
-    permission_classes = (AllowAny,)
-    #生成した画像からどのように洋服をおすすめするか
+    #生成した画像からどのように洋服をおすすめするか?
+    #生成できる画像に回数制限を設ける
+    #生成に失敗した際のerrorハンドリングの修正
     def post(self, request):
         data = request.data
         age = data['age']
@@ -87,11 +58,20 @@ class CreateImageView(APIView):
         color = data['color']
         material = data['material']
         situation = data['situation']
+        tops_fit = data['tops_fit']
+        bottoms_fit = data['bottoms_fit']
+        bottoms_length = data['bottoms_length']
         season = get_season()
+        Styling.objects.create(
+            user=request.user, age=age, height=height, weight=weight, size=size, silhouette=silhouette,
+            season=season, brand=brand, situation=situation, style=style, color=color, material=material, 
+            tops_fit=tops_fit, bottoms_fit=bottoms_fit, bottoms_length=bottoms_length
+        )
+
         #deepl
-        content = "好きな色は{color}、服のシルエットは{silhouette}、好きなスタイルは{style}、好きなブランドは{brand}、服を着用するシーンは{situation}、好みの素材は{material}、身長は{height}cm、体重は{weight}kg、性別は{gender}、季節は{season}、以下の情報をもとにスタイリングを作成しデザインやディテールまで詳細に記載したアイテムについて他の文章は必要ないので{{tops:"", bottoms:"", inner:"",shoes:"",accessory:""}}のJSON形式だけで返して尚アイテムに関しては情報をもとにtops(シャツ、ポロシャツ、ブラウス、カーディーガン、ニット、チュニック、ワンピース、ジャケット、コートなど）、\
-                   bottoms(デニム、スラックス、スカートなど）例に示したアイテムだけではなく考えられる全てのアイテムから情報に適したアイテムを選択すること。カラーに関しては好きな色の{color}を主体としつつ合うカラーパレットでスタイリングを組むこと。前の返答と同様の形式でjson形式の文章のみ返して".format(
-            color=color,silhouette=silhouette,style=style,brand=brand,situation=situation,material=material, height=height,weight=weight,gender=gender,season=season
+        content = "好きな色は{color}、服のシルエットは{silhouette}、好きなスタイルは{style}、好きなブランドは{brand}、服を着用するシーンは{situation}、好みの素材は{material}、身長は{height}cm、体重は{weight}kg、性別は{gender}、季節は{season}、トップスのシルエットは{tops_fit}、ボトムスのシルエットは{bottoms_fit}、ボトムスの丈は{bottoms_length}、尚アイテムに関しては情報をもとにtops(シャツ、ポロシャツ、ブラウス、カーディーガン、ニット、チュニック、ワンピース、ジャケット、コートなど）、\
+                bottoms(デニム、スラックス、スカートなど）例に示したアイテムだけではなく考えられる全てのアイテムから情報に適したアイテムを選択すること。アイテムのカラーに関しては{color}を主体としつつ合うカラーパレットでスタイリングを組むこと。これらの情報をもとに{{tops:"", bottoms:"", inner:"",shoes:"",accessory:""}}ように前の返答と同様の形式でスタイリングを作成しデザインやディテールまで詳細にjson形式の文章のみで返して".format(
+            color=color,silhouette=silhouette,style=style,brand=brand,situation=situation,material=material, height=height,weight=weight,gender=gender,season=season, tops_fit=tops_fit, bottoms_fit=bottoms_fit, bottoms_length=bottoms_length
         )
         
         #上記の文章を翻訳する
@@ -104,11 +84,11 @@ class CreateImageView(APIView):
                     "role": "assistant",
                     "content": 
                     str({
-                    "tops": "黒いビッグサイズのモードスタイルブラウス、立体的なディテールとレイヤードデザインが特徴",
-                    "bottoms": "ワイドレッグの黒いクロップドパンツ、ストラクチャードなシルエットでモード感を強調",
-                    "inner": "黒いシルク製キャミソール  、通気性が良く軽量な素材",
-                    "shoes": "ブラックのプラットフォームブーツ、モードスタイルをさらに引き立てるデザイン",
-                    "accessory": "黒いアシンメトリックなデザインのイヤリング、モードスタイルに相応しい個性的なアクセント"
+                    "tops": "A black wool jacket with cutout detailing and an over-size silhouette. Perfect for parties and adding a punk edge to any outfit.",
+                    "bottoms": "Long black wool trousers with a wide-leg silhouette and flowing movement. Perfect for pairing with the cutout over-size jacket for a complete YOHJI YAMAMOTO look.",
+                    "inner": "COSのクルーネックニット。黒いボリュームのあるデザインで、ジャケットの内側に合わせます。",
+                    "shoes": "Sleek and stylish black boots from Y-3, featuring a comfortable fit and modern design. Perfect for adding to a punk-inspired outfit.",
+                    "accessory": "A black leather crossbody bag with studded detailing, perfect for adding an edgy element to any outfit. The perfect accessory for a punk-inspired party look."
                     })
                 },
                 {
@@ -117,11 +97,10 @@ class CreateImageView(APIView):
                 }
             ]
         )
-        print(completion.choices[0].message)
         data = json.loads(completion.choices[0].message["content"])
-        print(data)
-        prompt = "Desired {height}cm {weight}kg {gender} full body styling, image(Season: {season}, Scene: {situation},  Age: {age}s, style: {style}, favorite color: {color}, Tops: {tops}, Bottom: {bottoms}, Shoes: {shoes}, accessory:{accessory}, Favorite Brand: {brand})".format(height=height, weight=weight, gender={gender}, season={get_season()}, 
-        situation={situation}, age={age}, brand={brand}, style={style}, color={color}, tops={data['tops']}, bottoms={data['bottoms']}, shoes={data['shoes']},accessory={data['accessory']})
+        #promptにできればaccessory=data['accessory']の枠も加えるようにする
+        prompt = "Full body styling of desired {gender} height {height} cm, weight {weight} kg, image( Season: {season}, Scene: {situation},  Age: {age}s, style: {style}, favorite color: {color}, Favorite Brand: {brand}, Tops: {tops}, Bottom: {bottoms}, Shoes: {shoes})".format(height=height, weight=weight, gender=gender, season=get_season(), 
+        situation=situation, age=age, brand=brand, style=style, color=color, tops=data['tops'], bottoms=data['bottoms'], shoes=data['shoes'])
 
         translator_prmpt = translate(prompt)
 
