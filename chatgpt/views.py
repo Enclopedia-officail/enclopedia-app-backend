@@ -1,6 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework import generics
+from django.shortcuts import get_list_or_404
 from .models import Styling
 
 import environ
@@ -9,10 +11,26 @@ import openai
 import deepl
 import json
 
+from dateutil.relativedelta import relativedelta
+from django.db.models import Q
+
 env = environ.Env()
 DEEPL_SECRET_KEY = env('DEEPL_SECRET_KEY')
 CHATGPT_SECRET_API = env("CHATGPT_API_KEY")
 openai.api_key = CHATGPT_SECRET_API
+
+
+class StylingListView(generics.ListAPIView):
+    queryset = Styling.objects.all()
+
+    def get(self, request):
+        start_of_month = datetime.datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_of_month = datetime.datetime.now().replace(day=1, hour=0, minute=0,second=0, microsecond=0) + relativedelta(months=1, days=0)
+        object = get_list_or_404(self.queryset , user=request.user, created_at__gte=start_of_month, created_at__lte=end_of_month)
+        data = {
+            "number": len(object)
+        }
+        return Response(data, status=status.HTTP_200_OK)
 
 season = {
     1 : 'winter',
@@ -62,12 +80,12 @@ class CreateImageView(APIView):
         bottoms_fit = data['bottoms_fit']
         bottoms_length = data['bottoms_length']
         season = get_season()
+        #画像をs3に保存しそのurlをurl fieldsに保存する処理を行う    
         Styling.objects.create(
             user=request.user, age=age, height=height, weight=weight, size=size, silhouette=silhouette,
             season=season, brand=brand, situation=situation, style=style, color=color, material=material, 
             tops_fit=tops_fit, bottoms_fit=bottoms_fit, bottoms_length=bottoms_length
         )
-
         #deepl
         content = "好きな色は{color}、服のシルエットは{silhouette}、好きなスタイルは{style}、好きなブランドは{brand}、服を着用するシーンは{situation}、好みの素材は{material}、身長は{height}cm、体重は{weight}kg、性別は{gender}、季節は{season}、トップスのシルエットは{tops_fit}、ボトムスのシルエットは{bottoms_fit}、ボトムスの丈は{bottoms_length}、尚アイテムに関しては情報をもとにtops(シャツ、ポロシャツ、ブラウス、カーディーガン、ニット、チュニック、ワンピース、ジャケット、コートなど）、\
                 bottoms(デニム、スラックス、スカートなど）例に示したアイテムだけではなく考えられる全てのアイテムから情報に適したアイテムを選択すること。アイテムのカラーに関しては{color}を主体としつつ合うカラーパレットでスタイリングを組むこと。これらの情報をもとに{{tops:"", bottoms:"", inner:"",shoes:"",accessory:""}}ように前の返答と同様の形式でスタイリングを作成しデザインやディテールまで詳細にjson形式の文章のみで返して".format(

@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from user.models import Account
+from django.utils import timezone
 
 
 class Styling(models.Model):
@@ -20,6 +21,7 @@ class Styling(models.Model):
     tops_fit = models.CharField(max_length=100)
     bottoms_fit = models.CharField(max_length=100)
     bottoms_length = models.CharField(max_length=100)
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
         return str(self.id)
