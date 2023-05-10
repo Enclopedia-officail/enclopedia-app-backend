@@ -1,10 +1,12 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.core.files import File
 from rest_framework import status
 from rest_framework import generics
 from django.shortcuts import get_list_or_404
 from .models import Styling
-
+from django.core.files.base import ContentFile
+from urllib.request import urlopen
 import environ
 import datetime
 import openai
@@ -80,12 +82,7 @@ class CreateImageView(APIView):
         bottoms_fit = data['bottoms_fit']
         bottoms_length = data['bottoms_length']
         season = get_season()
-        #画像をs3に保存しそのurlをurl fieldsに保存する処理を行う    
-        Styling.objects.create(
-            user=request.user, age=age, height=height, weight=weight, size=size, silhouette=silhouette,
-            season=season, brand=brand, situation=situation, style=style, color=color, material=material, 
-            tops_fit=tops_fit, bottoms_fit=bottoms_fit, bottoms_length=bottoms_length
-        )
+
         #deepl
         content = "好きな色は{color}、服のシルエットは{silhouette}、好きなスタイルは{style}、好きなブランドは{brand}、服を着用するシーンは{situation}、好みの素材は{material}、身長は{height}cm、体重は{weight}kg、性別は{gender}、季節は{season}、トップスのシルエットは{tops_fit}、ボトムスのシルエットは{bottoms_fit}、ボトムスの丈は{bottoms_length}、尚アイテムに関しては情報をもとにtops(シャツ、ポロシャツ、ブラウス、カーディーガン、ニット、チュニック、ワンピース、ジャケット、コートなど）、\
                 bottoms(デニム、スラックス、スカートなど）例に示したアイテムだけではなく考えられる全てのアイテムから情報に適したアイテムを選択すること。アイテムのカラーに関しては{color}を主体としつつ合うカラーパレットでスタイリングを組むこと。これらの情報をもとに{{tops:"", bottoms:"", inner:"",shoes:"",accessory:""}}ように前の返答と同様の形式でスタイリングを作成しデザインやディテールまで詳細にjson形式の文章のみで返して".format(
@@ -128,6 +125,17 @@ class CreateImageView(APIView):
             prompt = translator_prmpt,
             n = 1,
             size="1024x1024"
+        )
+        #画像をs3に保存しそのurlをurl fieldsに保存する処理を行
+        url = urlopen(response['data'][0]['url'])
+        chatgpt_image = url.read()
+        print('start')
+        print(chatgpt_image)
+        file = ContentFile(chatgpt_image)
+        Styling.objects.create(
+            user=request.user, age=age, height=height, weight=weight, size=size, silhouette=silhouette,
+            season=season, brand=brand, situation=situation, style=style, color=color, material=material, 
+            tops_fit=tops_fit, bottoms_fit=bottoms_fit, bottoms_length=bottoms_length, image=file
         )
         #生成した画像は保存するようにする
         return Response(response['data'], status=status.HTTP_200_OK)
