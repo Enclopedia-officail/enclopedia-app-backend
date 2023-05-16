@@ -312,6 +312,7 @@ class StripeCheckoutView(APIView):
         plan = data['plan']
         total_price=data['total_price']
         shipping_price=data['shipping_price']
+        reserved_start_date=data['reserved_start_date']
         reserved_end_date=data['reserved_end_date']
         delivery_time = data['delivery_time']
 
@@ -328,6 +329,7 @@ class StripeCheckoutView(APIView):
                 adress_id=address,
                 status=0,
                 plan=plan,
+                reserved_start_date=reserved_start_date,
                 reserved_end_date=reserved_end_date,
                 total_price=total_price,
                 shipping_price=shipping_price

@@ -8,6 +8,7 @@ from user.models import Account, Adress
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
 from subscription.models import Payment
+from django.utils import timezone
 import uuid
 
 auth_user = settings.AUTH_USER_MODEL if getattr(
@@ -56,7 +57,7 @@ class Reservation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     adress = models.ForeignKey(Adress, on_delete=models.CASCADE)
-    reserved_start_date = models.DateTimeField(auto_now_add=True)
+    reserved_start_date = models.DateTimeField(default=timezone.now)
     reserved_end_date = models.DateTimeField(blank=True, null=True)
     # 現在レンタル中かを判断するためのfield
     is_reserved = models.BooleanField(default=False)

@@ -168,6 +168,7 @@ class ReservationCreateView(APIView):
         data = request.data
         adress = data['address']
         #frontendから受け取るのではなくこちらで処理する必要がある
+        reserved_start_date = data['reserved_start_date']
         reserved_end_date = data['reserved_end_date']
         plan = data['plan']
         constract_date = data['contract_date']
@@ -184,6 +185,7 @@ class ReservationCreateView(APIView):
                 adress_id=adress,
                 status=0,
                 plan=plan,
+                reserved_start_date=reserved_start_date,
                 reserved_end_date=reserved_end_date,
             )
 
@@ -307,6 +309,7 @@ class ReservationCreateView(APIView):
                             adress_id=adress,
                             status=0,
                             plan=plan,
+                            reserved_start_date=reserved_start_date,
                             reserved_end_date=reserved_end_date,
                         )
                         cartitems = CartItem.objects.filter(cart_id=cart)
