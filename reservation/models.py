@@ -57,6 +57,7 @@ class Reservation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     adress = models.ForeignKey(Adress, on_delete=models.CASCADE)
+    reserved_day = models.DateTimeField(default=timezone.now())
     reserved_start_date = models.DateTimeField(default=timezone.now)
     reserved_end_date = models.DateTimeField(blank=True, null=True)
     # 現在レンタル中かを判断するためのfield

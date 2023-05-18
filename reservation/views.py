@@ -96,7 +96,7 @@ class ReservationRentalListView(generics.ListAPIView):
             current_month = today.replace(day=1, hour=0, minute=0,second=0)
             last_day = today
         #各月の初めから週末までのデータをrequestに応じて取得するよるようにする
-        reservation = get_list_or_404(self.queryset, user=user,status__in = status_list, reserved_start_date__range=[current_month, last_day])
+        reservation = get_list_or_404(self.queryset, user=user,status__in = status_list, reserved_day__range=[current_month, last_day])
         serializer = self.serializer_class(reservation, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -111,7 +111,7 @@ class ReservationRentalHalfYearView(generics.ListAPIView):
         today = datetime.datetime.now()
         start_date = today - relativedelta(months=6)
         status_list = [1, 2, 3, 4, 5]
-        reservations = get_list_or_404(self.queryset, user=user, status__in = status_list, reserved_start_date__range=[start_date, today])
+        reservations = get_list_or_404(self.queryset, user=user, status__in = status_list, reserved_day__range=[start_date, today])
         serializer = self.serializer_class(reservations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -177,7 +177,7 @@ class ReservationCreateView(APIView):
         user = request.user
         status_list = [1, 3, 4, 5]
         reservation = Reservation.objects.order_by('-reserved_start_date').select_related('user', 'adress').filter(
-            user=user, reserved_start_date__gte=constract_date, status__in = status_list)
+            user=user, reserved_day__gte=constract_date, status__in = status_list)
         subscription_user_info = StripeAccount.objects.select_related('user_id').get(user_id=user)
         if subscription_user_info.is_active & (subscription_user_info.plan == plan == 'basic'):
             create_reservation = Reservation.objects.create(
