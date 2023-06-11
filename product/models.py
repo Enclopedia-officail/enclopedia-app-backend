@@ -85,7 +85,8 @@ plan_choices = [
 gender_choice = [
     ('メンズ', 'mens'),
     ('レディース', 'ladies'),
-    ('キッズ', 'kids')
+    ('キッズ', 'kids'),
+    ('ユニセックス', 'unisex')
 ]
 
 
