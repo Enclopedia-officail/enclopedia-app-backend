@@ -27,7 +27,13 @@ def upload_thumbnail(instance, filename):
 
 def upload_product(instance, filename):
     now = time.time()
-    image_filename = str(now) + str(instance.id)+'.webp'
+    ext = filename.split('.')[-1]
+    if ext == 'webp':
+        image_filename = str(now) + str(instance.id) + '.webp'
+    elif ext == 'png':
+        image_filename = str(now) + str(instance.id) + '.png'
+    elif ext == 'jpg':
+        image_filename = str(now) + str(instance.id)+'.jpg'
     return 'product/' + image_filename
 
 # 配送料を決定するための
