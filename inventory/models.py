@@ -1,5 +1,6 @@
 from django.db import models
 from product.models import Product
+from user.models import Account
 # Create your models here.
 
 # productが保管してある倉庫場所
@@ -19,8 +20,6 @@ class Warehouse(models.Model):
        return self.warehouse_name
 
 #productとは別に在庫を管理するためのtable
-
-
 class Inventory(models.Model):
     STORING = 0 # 商品が入庫されていて出品していない状態　
     LEAVING = 1 # 商品が出庫されてレンタル商品として出品されている状態
@@ -36,6 +35,21 @@ class Inventory(models.Model):
     classification = models.SmallIntegerField(choices=CLASSIFICATION, default=STORING)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+
+#買い付けた商品詳細
+class Purchase(models.Model):
+    #買い付け番号
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, default=None)
+    created_at = models.DateField(auto_now_add=True)
+
+class Item(models.Model):
+    number = models.CharField(max_length=6) #買い付けごと番号を付与する
+    item = models.CharField(max_length=250)
+    condition = models.CharField(max_length=250)
+    price = models.IntegerField()
+    bought = models.BooleanField(default=False)
+    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
+
 
 
 

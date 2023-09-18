@@ -1,8 +1,11 @@
 from django.contrib import admin
 from product.models import Product, Size, Shipping, Price, Variation, ReviewRating, ImageGallary, Tag
+from django.utils.safestring import mark_safe
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product_name', 'stock', 'gender')
+    def product_image(self, obj):
+        return mark_safe('<img src="{}" style="width:100px;height:auto;">'.format(obj.img.url))
+    list_display = ('id', 'product_name', 'stock', 'gender', 'product_image')
     list_filter = ['created_at']
     list_per_page = 100
     search_fields = ['id', 'product_name']
