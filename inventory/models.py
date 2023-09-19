@@ -2,8 +2,20 @@ from django.db import models
 from product.models import Product
 from user.models import Account
 # Create your models here.
+import time
 
 # productが保管してある倉庫場所
+
+def upload_img(instance, filename):
+    now = time.time()
+    ext = filename.split('.')[-1]
+    if ext == 'webp':
+            image_filename = str(now) + str(instance.id) + '.webp'
+    elif ext == 'png':
+        image_filename = str(now) + str(instance.id) + '.png'
+    elif ext == 'jpg':
+        image_filename = str(now) + str(instance.id)+'.jpg'
+    return 'product/' + image_filename
 
 #在庫保管場所
 class Warehouse(models.Model):
@@ -42,8 +54,10 @@ class Purchase(models.Model):
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, default=None)
     created_at = models.DateField(auto_now_add=True)
 
+#画像をこちらに保存するか考える
 class Item(models.Model):
     number = models.CharField(max_length=6) #買い付けごと番号を付与する
+    img = models.FileField(upload_to=upload_img, default=None, null=True)
     item = models.CharField(max_length=250)
     condition = models.CharField(max_length=250)
     price = models.IntegerField()
