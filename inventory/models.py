@@ -56,7 +56,7 @@ class Purchase(models.Model):
 
 #画像をこちらに保存するか考える
 class Item(models.Model):
-    number = models.CharField(max_length=6) #買い付けごと番号を付与する
+    number = models.CharField(max_length=6, blank=True) #買い付けごと番号を付与する
     img = models.FileField(upload_to=upload_img, default=None, null=True)
     item = models.CharField(max_length=250)
     condition = models.CharField(max_length=250)

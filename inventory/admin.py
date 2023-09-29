@@ -5,7 +5,7 @@ import random
 import string
 
 def generate_unique_string(length=6):
-    result = ''.join(random.sample(string.ascii_letters, length))
+    result = str(random.randint(0,999999))
     return result   
 
 class WarehouseAdmin(admin.ModelAdmin):
@@ -28,7 +28,7 @@ class ItemAdmin(admin.ModelAdmin):
     search_fields = ('number', 'purchase__id')
 
     def save_model(self, request, obj, form, change):
-        if obj.number == None:
+        if obj.number == '':
             num = generate_unique_string()
             obj.number = num
             obj.save()
